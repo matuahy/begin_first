@@ -41,7 +41,7 @@ class AppButton extends StatelessWidget {
         padding: padding ?? const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 13),
         decoration: _decoration(resolvedVariant, disabled),
         child: DefaultTextStyle(
-          style: AppTextStyles.button.copyWith(color: _foregroundColor(resolvedVariant, disabled)),
+          style: AppTextStyles.body.copyWith(color: _foregroundColor(resolvedVariant, disabled)),
           child: Row(
             mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -121,5 +121,36 @@ class AppButton extends StatelessWidget {
       case AppButtonVariant.ghost:
         return AppColors.textPrimary;
     }
+  }
+}
+
+/// 纯文字红色删除按钮，用于危险操作
+class DestructiveTextButton extends StatelessWidget {
+  const DestructiveTextButton({
+    required this.label,
+    this.onPressed,
+    super.key,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      onPressed: onPressed,
+      child: Text(
+        label,
+        style: AppTextStyles.body.copyWith(
+          color: onPressed != null
+              ? AppColors.error
+              : AppColors.error.withOpacity(0.5),
+        ),
+      ),
+    );
   }
 }

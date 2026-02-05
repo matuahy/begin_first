@@ -6,8 +6,8 @@ import 'package:begin_first/features/items/providers/item_detail_provider.dart';
 import 'package:begin_first/features/items/providers/items_provider.dart';
 import 'package:begin_first/features/records/providers/record_provider.dart';
 import 'package:begin_first/features/records/widgets/record_timeline.dart';
+import 'package:begin_first/shared/widgets/action_button_card.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
-import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:begin_first/shared/widgets/photo_viewer.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,6 +33,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     final recordsAsync = ref.watch(itemRecordsProvider(widget.itemId));
 
     return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
         middle: Text(item?.name ?? '物品详情'),
         trailing: item == null
@@ -44,106 +45,197 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
               ),
       ),
       child: SafeArea(
-        child: DecoratedBox(
-          decoration: AppDecorations.page,
-          child: itemsAsync.when(
-            data: (_) {
-              if (item == null) {
-                return const EmptyState(
-                  title: '未找到物品',
-                  message: '它可能已被删除，请返回列表确认。',
-                  icon: CupertinoIcons.exclamationmark_circle,
-                );
-              }
-              return ListView(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                children: [
-                  AppCard(
-                    isEmphasized: true,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        PhotoViewer(path: item.coverImagePath, height: 176),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(item.name, style: AppTextStyles.heading),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          '${_categoryLabel(item.category)} · ${_importanceLabel(item.importance)}',
-                          style: AppTextStyles.bodyMuted,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppButton(
-                                label: '记录一次',
-                                leadingIcon: CupertinoIcons.camera,
-                                onPressed: () => context.go('/items/${widget.itemId}/record'),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Expanded(
-                              child: AppButton(
-                                label: '我找不到了',
-                                leadingIcon: CupertinoIcons.search,
-                                variant: AppButtonVariant.secondary,
-                                onPressed: () => context.go('/items/${widget.itemId}/retrieve'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  const Text('记录轨迹', style: AppTextStyles.label),
-                  const SizedBox(height: AppSpacing.sm),
-                  _FilterControl(
-                    value: _filter,
-                    onChanged: (value) => setState(() => _filter = value),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  recordsAsync.when(
-                    data: (records) {
-                      final filtered = _applyFilter(records);
-                      if (filtered.isEmpty) {
-                        return const EmptyState(
-                          title: '暂无记录',
-                          message: '去拍一张当前摆放位置，后续就能快速找回。',
-                          icon: CupertinoIcons.clock,
-                          compact: true,
-                        );
-                      }
-                      return RecordTimeline(
-                        records: filtered,
-                        onRecordTap: (record) => context.go('/records/${record.id}'),
-                      );
-                    },
-                    loading: () => const Center(child: CupertinoActivityIndicator()),
-                    error: (error, stack) => EmptyState(
-                      title: '记录读取失败',
-                      message: '加载记录失败：$error',
-                      icon: CupertinoIcons.exclamationmark_triangle,
-                      compact: true,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  AppButton(
-                    label: '删除物品',
-                    isDestructive: true,
-                    onPressed: () => _confirmDelete(context, ref),
-                  ),
-                ],
+        child: itemsAsync.when(
+          data: (_) {
+            if (item == null) {
+              return const EmptyState(
+                icon: CupertinoIcons.cube_box,
+                title: '未找到物品',
+                message: '该物品可能已被删除或不存在',
               );
-            },
-            loading: () => const Center(child: CupertinoActivityIndicator()),
-            error: (error, stack) => EmptyState(
-              title: '加载失败',
-              message: '加载物品失败：$error',
-              icon: CupertinoIcons.exclamationmark_triangle,
-            ),
+            }
+            return ListView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              children: [
+                // 封面图片
+                PhotoViewer(path: item.coverImagePath, height: 220),
+                const SizedBox(height: AppSpacing.lg),
+
+                // 物品信息卡片
+                _buildInfoCard(
+                    context, item.name, item.category, item.importance),
+                const SizedBox(height: AppSpacing.md),
+
+                // 快捷操作卡片
+                ActionButtonCardRow(
+                  children: [
+                    ActionButtonCard(
+                      icon: CupertinoIcons.pencil_outline,
+                      title: '添加记录',
+                      subtitle: '记录这件物品的存放位置',
+                      onTap: () => context.go('/items/${widget.itemId}/record'),
+                    ),
+                    ActionButtonCard(
+                      icon: CupertinoIcons.location,
+                      title: '找回物品',
+                      subtitle: '查看存放位置，快速定位',
+                      iconColor: AppColors.success,
+                      onTap: () =>
+                          context.go('/items/${widget.itemId}/retrieve'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // 记录历史卡片
+                _buildRecordsSection(context, recordsAsync),
+                const SizedBox(height: AppSpacing.xl),
+
+                // 危险操作区域
+                _buildDangerZone(context, ref),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+            );
+          },
+          loading: () => const Center(child: CupertinoActivityIndicator()),
+          error: (error, stack) => EmptyState(
+            icon: CupertinoIcons.exclamationmark_triangle,
+            title: '加载失败',
+            message: '无法加载物品信息：$error',
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(
+    BuildContext context,
+    String name,
+    Category category,
+    Importance importance,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: AppShadows.subtle,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(name, style: AppTextStyles.title1),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              _buildTag(
+                context,
+                _categoryLabel(category),
+                CupertinoColors.systemBlue,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              _buildTag(
+                context,
+                '重要性：${_importanceLabel(importance)}',
+                _importanceColor(importance),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTag(BuildContext context, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.caption1.copyWith(color: color),
+      ),
+    );
+  }
+
+  Widget _buildRecordsSection(
+    BuildContext context,
+    AsyncValue<List<Record>> recordsAsync,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: AppShadows.subtle,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('最近记录', style: AppTextStyles.headline),
+              Text(
+                '查看全部',
+                style: AppTextStyles.subhead.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _FilterControl(
+            value: _filter,
+            onChanged: (value) => setState(() => _filter = value),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          recordsAsync.when(
+            data: (records) {
+              final filtered = _applyFilter(records);
+              if (filtered.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                  child: EmptyState(
+                    icon: CupertinoIcons.doc_text,
+                    title: '还没有任何记录',
+                    message: '添加第一条记录，开始追踪这件物品',
+                    actionLabel: '添加记录',
+                    onAction: () =>
+                        context.go('/items/${widget.itemId}/record'),
+                  ),
+                );
+              }
+              return RecordTimeline(
+                records: filtered,
+                onRecordTap: (record) => context.go('/records/${record.id}'),
+              );
+            },
+            loading: () => const Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Center(child: CupertinoActivityIndicator()),
+            ),
+            error: (error, stack) => EmptyState(
+              icon: CupertinoIcons.exclamationmark_triangle,
+              title: '加载记录失败',
+              message: '$error',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDangerZone(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: DestructiveTextButton(
+        label: '删除这件物品',
+        onPressed: () => _confirmDelete(context, ref),
       ),
     );
   }
@@ -152,8 +244,8 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     final result = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('删除物品'),
-        content: const Text('将删除该物品及其关联记录的引用。'),
+        title: const Text('确认删除'),
+        content: const Text('删除后将无法恢复，该物品的所有记录引用也会被移除。'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
@@ -169,10 +261,21 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     );
 
     if (result == true) {
-      await ref.read(itemActionsProvider).deleteItem(itemId);
+      await ref.read(itemActionsProvider).deleteItem(widget.itemId);
       if (context.mounted) {
         context.go('/items');
       }
+    }
+  }
+
+  Color _importanceColor(Importance importance) {
+    switch (importance) {
+      case Importance.high:
+        return AppColors.error;
+      case Importance.medium:
+        return AppColors.warning;
+      case Importance.low:
+        return AppColors.success;
     }
   }
 
@@ -226,21 +329,25 @@ class _FilterControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoSegmentedControl<RecordFilter>(
+    return CupertinoSlidingSegmentedControl<RecordFilter>(
       groupValue: value,
-      onValueChanged: onChanged,
+      onValueChanged: (newValue) {
+        if (newValue != null) {
+          onChanged(newValue);
+        }
+      },
       children: const {
         RecordFilter.all: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: EdgeInsets.symmetric(horizontal: 12),
           child: Text('全部'),
         ),
         RecordFilter.last7: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Text('7天'),
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: Text('近 7 天'),
         ),
         RecordFilter.last30: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Text('30天'),
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: Text('近 30 天'),
         ),
       },
     );

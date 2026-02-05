@@ -3,6 +3,8 @@ import 'package:begin_first/shared/widgets/app_button.dart';
 import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:flutter/cupertino.dart';
 
+/// iOS风格的空状态组件
+/// 支持图标、主标题、副标题和操作按钮
 class EmptyState extends StatelessWidget {
   const EmptyState({
     required this.message,

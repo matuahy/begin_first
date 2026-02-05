@@ -92,6 +92,33 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
     letterSpacing: -0.1,
   );
+
+  // iOS style aliases
+  static const TextStyle largeTitle = titleLarge;
+  static const TextStyle title1 = title;
+  static const TextStyle title2 = heading;
+  static const TextStyle headline = TextStyle(
+    fontSize: 17,
+    fontWeight: FontWeight.w600,
+  );
+  static const TextStyle callout = TextStyle(
+    fontSize: 16,
+  );
+  static const TextStyle subhead = TextStyle(
+    fontSize: 15,
+  );
+  static const TextStyle footnote = TextStyle(
+    fontSize: 13,
+    color: CupertinoColors.secondaryLabel,
+  );
+  static const TextStyle caption1 = TextStyle(
+    fontSize: 12,
+    color: CupertinoColors.secondaryLabel,
+  );
+  static const TextStyle caption2 = TextStyle(
+    fontSize: 11,
+    color: CupertinoColors.tertiaryLabel,
+  );
 }
 
 class AppDecorations {
@@ -126,6 +153,35 @@ class AppDecorations {
     );
   }
 }
+
+/// iOS风格阴影样式
+class AppShadows {
+  static List<BoxShadow> get card => [
+        BoxShadow(
+          color: CupertinoColors.systemGrey.withOpacity(0.1),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ];
+
+  static List<BoxShadow> get elevated => [
+        BoxShadow(
+          color: CupertinoColors.systemGrey.withOpacity(0.15),
+          blurRadius: 20,
+          offset: const Offset(0, 8),
+        ),
+      ];
+
+  static List<BoxShadow> get subtle => [
+        BoxShadow(
+          color: CupertinoColors.systemGrey.withOpacity(0.08),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+      ];
+}
+
+
 
 class AppTheme {
   static CupertinoThemeData light() {
