@@ -69,10 +69,13 @@ class _RecordDetailScreenState extends ConsumerState<RecordDetailScreen> {
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   item?.name ?? '物品 ${record.itemId}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                Text(record.timestamp.fullDateTime, style: const TextStyle(color: CupertinoColors.secondaryLabel)),
+                Text(record.timestamp.fullDateTime,
+                    style:
+                        const TextStyle(color: CupertinoColors.secondaryLabel)),
                 const SizedBox(height: AppSpacing.lg),
                 CupertinoFormSection.insetGrouped(
                   header: const Text('备注'),
@@ -91,18 +94,20 @@ class _RecordDetailScreenState extends ConsumerState<RecordDetailScreen> {
                   const SizedBox(height: AppSpacing.md),
                   AppButton(
                     label: '打开位置',
-                    onPressed: () => ref.read(locationServiceProvider).openInMaps(
-                          location.latitude,
-                          location.longitude,
-                          location.placeName,
-                        ),
+                    onPressed: () =>
+                        ref.read(locationServiceProvider).openInMaps(
+                              location.latitude,
+                              location.longitude,
+                              location.placeName,
+                            ),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.lg),
-                AppButton(
-                  label: '删除记录',
-                  isDestructive: true,
-                  onPressed: () => _confirmDelete(record),
+                Center(
+                  child: DestructiveTextButton(
+                    label: '删除这条记录',
+                    onPressed: () => _confirmDelete(record),
+                  ),
                 ),
               ],
             );
@@ -125,7 +130,9 @@ class _RecordDetailScreenState extends ConsumerState<RecordDetailScreen> {
         .where((tag) => tag.isNotEmpty)
         .toList();
     final updated = record.copyWith(
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      note: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
       tags: tags,
     );
     await ref.read(recordActionsProvider).updateRecord(updated);

@@ -1,6 +1,6 @@
 import 'package:begin_first/app/theme.dart';
 import 'package:begin_first/core/utils/validators.dart';
-import 'package:begin_first/domain/models/intent.dart';
+import 'package:begin_first/domain/models/intent.dart' as model;
 import 'package:begin_first/features/nudges/providers/intents_provider.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,7 +36,9 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
   Widget build(BuildContext context) {
     final isEditing = widget.intentId != null;
     final intentsAsync = ref.watch(intentsStreamProvider);
-    final intent = widget.intentId == null ? null : ref.watch(intentDetailProvider(widget.intentId!));
+    final intent = widget.intentId == null
+        ? null
+        : ref.watch(intentDetailProvider(widget.intentId!));
 
     if (isEditing) {
       if (intentsAsync.isLoading) {
@@ -111,10 +113,11 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
               ),
             if (intent != null) ...[
               const SizedBox(height: AppSpacing.lg),
-              AppButton(
-                label: '删除意图',
-                isDestructive: true,
-                onPressed: () => _confirmDelete(intent),
+              Center(
+                child: DestructiveTextButton(
+                  label: '删除这个意图',
+                  onPressed: () => _confirmDelete(intent),
+                ),
               ),
             ],
           ],
@@ -123,8 +126,9 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
     );
   }
 
-  Future<void> _save(Intent? intent) async {
-    final validation = Validators.requiredText(_titleController.text, message: '请填写标题');
+  Future<void> _save(model.Intent? intent) async {
+    final validation =
+        Validators.requiredText(_titleController.text, message: '请填写标题');
     if (validation != null) {
       await showCupertinoDialog<void>(
         context: context,
@@ -153,13 +157,17 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
     if (intent == null) {
       await actions.createIntent(
         title: _titleController.text.trim(),
-        nextStep: _nextStepController.text.trim().isEmpty ? null : _nextStepController.text.trim(),
+        nextStep: _nextStepController.text.trim().isEmpty
+            ? null
+            : _nextStepController.text.trim(),
         tags: tags,
       );
     } else {
       final updated = intent.copyWith(
         title: _titleController.text.trim(),
-        nextStep: _nextStepController.text.trim().isEmpty ? null : _nextStepController.text.trim(),
+        nextStep: _nextStepController.text.trim().isEmpty
+            ? null
+            : _nextStepController.text.trim(),
         tags: tags,
         isCompleted: _isCompleted,
         updatedAt: DateTime.now(),
@@ -172,7 +180,7 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
     }
   }
 
-  Future<void> _confirmDelete(Intent intent) async {
+  Future<void> _confirmDelete(model.Intent intent) async {
     final result = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(

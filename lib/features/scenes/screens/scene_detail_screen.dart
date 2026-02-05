@@ -132,7 +132,7 @@ class SceneDetailScreen extends ConsumerWidget {
                       if (records.isEmpty) {
                         return const EmptyState(
                           title: '暂无记录',
-                          message: '试试“开始记录”，连续拍几张更高效。',
+                          message: '试试"开始记录"，连续拍几张更高效。',
                           icon: CupertinoIcons.clock,
                           compact: true,
                         );
@@ -151,10 +151,11 @@ class SceneDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  AppButton(
-                    label: '删除场景',
-                    isDestructive: true,
-                    onPressed: () => _confirmDelete(context, ref),
+                  Center(
+                    child: DestructiveTextButton(
+                      label: '删除这个场景',
+                      onPressed: () => _confirmDelete(context, ref),
+                    ),
                   ),
                 ],
               );
