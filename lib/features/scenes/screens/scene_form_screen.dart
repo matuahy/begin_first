@@ -40,7 +40,9 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
     final isEditing = widget.sceneId != null;
     final scenesAsync = ref.watch(scenesStreamProvider);
     final itemsAsync = ref.watch(itemsStreamProvider);
-    final scene = widget.sceneId == null ? null : ref.watch(sceneDetailProvider(widget.sceneId!));
+    final scene = widget.sceneId == null
+        ? null
+        : ref.watch(sceneDetailProvider(widget.sceneId!));
     final items = itemsAsync.valueOrNull ?? const <Item>[];
 
     final itemRows = itemsAsync.when<List<Widget>>(
@@ -116,7 +118,7 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
         middle: Text(isEditing ? '编辑场景' : '新建场景'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: _isSaving ? null : () => _save(scene),
+          onPressed: _isSaving ? null : () => _save(scene, items),
           child: const Text('保存'),
         ),
       ),
@@ -167,8 +169,9 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
     );
   }
 
-  Future<void> _save(Scene? scene) async {
-    final validation = Validators.requiredText(_nameController.text, message: '请填写名称');
+  Future<void> _save(Scene? scene, List<Item> items) async {
+    final validation =
+        Validators.requiredText(_nameController.text, message: '请填写名称');
     if (validation != null) {
       await showCupertinoDialog<void>(
         context: context,
@@ -193,7 +196,9 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
       await actions.createScene(
         name: _nameController.text.trim(),
         type: _type,
-        iconName: _iconController.text.trim().isEmpty ? 'scene' : _iconController.text.trim(),
+        iconName: _iconController.text.trim().isEmpty
+            ? 'scene'
+            : _iconController.text.trim(),
         defaultItemIds: _orderedSelectedIds(items),
         isActive: _isActive,
       );
@@ -201,7 +206,9 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
       final updated = scene.copyWith(
         name: _nameController.text.trim(),
         type: _type,
-        iconName: _iconController.text.trim().isEmpty ? scene.iconName : _iconController.text.trim(),
+        iconName: _iconController.text.trim().isEmpty
+            ? scene.iconName
+            : _iconController.text.trim(),
         defaultItemIds: _orderedSelectedIds(items),
         isActive: _isActive,
       );
