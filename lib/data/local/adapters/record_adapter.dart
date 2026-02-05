@@ -12,7 +12,7 @@ class RecordAdapter extends TypeAdapter<Record> {
     final itemId = reader.readString();
     final sceneId = reader.read() as String?;
     final photoPath = reader.readString();
-    final timestamp = reader.readDateTime();
+    final timestamp = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
     final location = reader.read() as LocationInfo?;
     final note = reader.read() as String?;
     final tags = reader.readList().cast<String>();
@@ -35,7 +35,7 @@ class RecordAdapter extends TypeAdapter<Record> {
       ..writeString(obj.itemId)
       ..write(obj.sceneId)
       ..writeString(obj.photoPath)
-      ..writeDateTime(obj.timestamp)
+      ..writeInt(obj.timestamp.millisecondsSinceEpoch)
       ..write(obj.location)
       ..write(obj.note)
       ..writeList(obj.tags);

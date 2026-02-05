@@ -16,12 +16,16 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTabScaffold(
-      tabBar: BottomTabBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: _onTap,
+    return CupertinoPageScaffold(
+      child: Column(
+        children: [
+          Expanded(child: navigationShell),
+          BottomTabBar(
+            currentIndex: navigationShell.currentIndex,
+            onTap: _onTap,
+          ),
+        ],
       ),
-      tabBuilder: (context, index) => navigationShell,
     );
   }
 }

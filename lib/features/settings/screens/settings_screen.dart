@@ -7,14 +7,14 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return const CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
         middle: Text('Settings'),
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: const EmptyState(message: 'Settings go here.'),
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: EmptyState(message: 'Settings go here.'),
         ),
       ),
     );

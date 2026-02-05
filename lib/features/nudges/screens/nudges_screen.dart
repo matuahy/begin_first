@@ -1,5 +1,5 @@
 import 'package:begin_first/app/theme.dart';
-import 'package:begin_first/domain/models/intent.dart';
+import 'package:begin_first/domain/models/intent.dart' as app_intent;
 import 'package:begin_first/features/nudges/providers/intents_provider.dart';
 import 'package:begin_first/features/nudges/providers/nudge_provider.dart';
 import 'package:begin_first/features/nudges/widgets/intent_list_tile.dart';
@@ -33,7 +33,9 @@ class NudgesScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Random Nudge', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const Text('Random Nudge',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: () => ref.invalidate(randomNudgeProvider),
@@ -56,30 +58,38 @@ class NudgesScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, stack) => EmptyState(message: 'Failed to load nudge: $error'),
+              error: (error, stack) =>
+                  EmptyState(message: 'Failed to load nudge: $error'),
             ),
             const SizedBox(height: AppSpacing.lg),
-            const Text('Intents', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const Text('Intents',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: AppSpacing.sm),
             intentsAsync.when(
               data: (intents) {
                 if (intents.isEmpty) {
                   return const EmptyState(message: 'No intents yet.');
                 }
-                final active = intents.where((intent) => !intent.isCompleted).toList();
-                final completed = intents.where((intent) => intent.isCompleted).toList();
+                final active =
+                    intents.where((intent) => !intent.isCompleted).toList();
+                final completed =
+                    intents.where((intent) => intent.isCompleted).toList();
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (active.isNotEmpty) ...[
-                      const Text('Active', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const Text('Active',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: AppSpacing.sm),
                       ...active.map((intent) => _IntentTile(intent: intent)),
                       const SizedBox(height: AppSpacing.lg),
                     ],
                     if (completed.isNotEmpty) ...[
-                      const Text('Completed', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const Text('Completed',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: AppSpacing.sm),
                       ...completed.map((intent) => _IntentTile(intent: intent)),
                     ],
@@ -87,7 +97,8 @@ class NudgesScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, stack) => EmptyState(message: 'Failed to load intents: $error'),
+              error: (error, stack) =>
+                  EmptyState(message: 'Failed to load intents: $error'),
             ),
           ],
         ),
@@ -99,7 +110,7 @@ class NudgesScreen extends ConsumerWidget {
 class _IntentTile extends ConsumerWidget {
   const _IntentTile({required this.intent});
 
-  final Intent intent;
+  final app_intent.Intent intent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,7 +130,8 @@ class _IntentTile extends ConsumerWidget {
         subtitle: subtitle,
         isCompleted: intent.isCompleted,
         onTap: () => context.go('/nudges/${intent.id}/edit'),
-        onCompletedChanged: (value) => ref.read(intentActionsProvider).setCompleted(intent, value),
+        onCompletedChanged: (value) =>
+            ref.read(intentActionsProvider).setCompleted(intent, value),
       ),
     );
   }
@@ -128,7 +140,7 @@ class _IntentTile extends ConsumerWidget {
 class _ScheduleRow extends ConsumerWidget {
   const _ScheduleRow({required this.intent});
 
-  final Intent intent;
+  final app_intent.Intent intent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -138,12 +150,14 @@ class _ScheduleRow extends ConsumerWidget {
       children: [
         CupertinoButton.filled(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          onPressed: () => _schedule(context, ref, intent, const Duration(minutes: 30)),
+          onPressed: () =>
+              _schedule(context, ref, intent, const Duration(minutes: 30)),
           child: const Text('30 min'),
         ),
         CupertinoButton.filled(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          onPressed: () => _schedule(context, ref, intent, const Duration(hours: 2)),
+          onPressed: () =>
+              _schedule(context, ref, intent, const Duration(hours: 2)),
           child: const Text('2 hours'),
         ),
         CupertinoButton.filled(
@@ -163,14 +177,15 @@ class _ScheduleRow extends ConsumerWidget {
   Future<void> _schedule(
     BuildContext context,
     WidgetRef ref,
-    Intent intent,
+    app_intent.Intent intent,
     Duration offset,
   ) async {
     final scheduled = DateTime.now().add(offset);
     await _scheduleAt(context, ref, intent, scheduled);
   }
 
-  Future<void> _scheduleTonight(BuildContext context, WidgetRef ref, Intent intent) async {
+  Future<void> _scheduleTonight(
+      BuildContext context, WidgetRef ref, app_intent.Intent intent) async {
     final now = DateTime.now();
     var scheduled = DateTime(now.year, now.month, now.day, 21);
     if (scheduled.isBefore(now)) {
@@ -179,7 +194,8 @@ class _ScheduleRow extends ConsumerWidget {
     await _scheduleAt(context, ref, intent, scheduled);
   }
 
-  Future<void> _pickCustom(BuildContext context, WidgetRef ref, Intent intent) async {
+  Future<void> _pickCustom(
+      BuildContext context, WidgetRef ref, app_intent.Intent intent) async {
     final initial = DateTime.now().add(const Duration(hours: 1));
     DateTime selected = initial;
     final result = await showCupertinoModalPopup<bool>(
@@ -223,7 +239,7 @@ class _ScheduleRow extends ConsumerWidget {
   Future<void> _scheduleAt(
     BuildContext context,
     WidgetRef ref,
-    Intent intent,
+    app_intent.Intent intent,
     DateTime time,
   ) async {
     final success = await ref.read(nudgeActionsProvider).scheduleNudge(
@@ -238,7 +254,9 @@ class _ScheduleRow extends ConsumerWidget {
       builder: (context) => CupertinoAlertDialog(
         title: Text(success ? 'Scheduled' : 'Permission Needed'),
         content: Text(
-          success ? 'Reminder scheduled.' : 'Notification permission is required.',
+          success
+              ? 'Reminder scheduled.'
+              : 'Notification permission is required.',
         ),
         actions: [
           CupertinoDialogAction(

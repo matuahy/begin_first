@@ -6,11 +6,11 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return const CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
         middle: Text('Welcome'),
       ),
-      child: const SafeArea(
+      child: SafeArea(
         child: OnboardingPage(
           title: 'Welcome',
           description: 'Record where your essentials live in seconds.',

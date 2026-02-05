@@ -15,8 +15,8 @@ class ItemAdapter extends TypeAdapter<Item> {
     final importance = reader.read() as Importance;
     final coverImagePath = reader.read() as String?;
     final iconName = reader.read() as String?;
-    final createdAt = reader.readDateTime();
-    final updatedAt = reader.readDateTime();
+    final createdAt = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
+    final updatedAt = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
     return Item(
       id: id,
       name: name,
@@ -38,7 +38,7 @@ class ItemAdapter extends TypeAdapter<Item> {
       ..write(obj.importance)
       ..write(obj.coverImagePath)
       ..write(obj.iconName)
-      ..writeDateTime(obj.createdAt)
-      ..writeDateTime(obj.updatedAt);
+      ..writeInt(obj.createdAt.millisecondsSinceEpoch)
+      ..writeInt(obj.updatedAt.millisecondsSinceEpoch);
   }
 }

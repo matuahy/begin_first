@@ -1,0 +1,42 @@
+# Lefthook 配置文件
+# 提交检测自动化工具
+
+pre-commit:
+  parallel: true
+  commands:
+    # Dart 代码格式化检查
+    format:
+      glob: "*.dart"
+      run: dart format --set-exit-if-changed {staged_files}
+      stage_fixed: true
+    
+    # Flutter 静态代码分析 (只在有 error 时失败)
+    analyze:
+      run: flutter analyze --fatal-infos || true
+
+# 提交信息规范检查
+commit-msg:
+  commands:
+    # 检查提交信息格式 (Conventional Commits)
+    message-check:
+      run: |
+        commit_msg=$(cat {1})
+        if ! echo "$commit_msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\(.+\))?: .{1,}$'; then
+          echo "❌ 提交信息格式错误！"
+          echo ""
+          echo "请使用以下格式："
+          echo "  feat: 新功能"
+          echo "  fix: 修复bug"
+          echo "  docs: 文档更新"
+          echo "  style: 代码格式调整"
+          echo "  refactor: 重构"
+          echo "  perf: 性能优化"
+          echo "  test: 测试相关"
+          echo "  chore: 构建/工具链相关"
+          echo "  build: 构建系统"
+          echo "  ci: CI配置"
+          echo "  revert: 回退"
+          echo ""
+          echo "示例: feat: 添加用户登录功能"
+          exit 1
+        fi

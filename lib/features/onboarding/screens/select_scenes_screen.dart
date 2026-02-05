@@ -6,11 +6,11 @@ class SelectScenesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return const CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
         middle: Text('Select Scenes'),
       ),
-      child: const SafeArea(
+      child: SafeArea(
         child: OnboardingPage(
           title: 'Set your scenes',
           description: 'Define common places like home or office.',

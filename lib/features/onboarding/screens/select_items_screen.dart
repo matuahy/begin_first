@@ -6,11 +6,11 @@ class SelectItemsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return const CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
         middle: Text('Select Items'),
       ),
-      child: const SafeArea(
+      child: SafeArea(
         child: OnboardingPage(
           title: 'Pick your essentials',
           description: 'Choose items you want to track first.',

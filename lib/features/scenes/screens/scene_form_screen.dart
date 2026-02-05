@@ -40,8 +40,10 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
     final isEditing = widget.sceneId != null;
     final scenesAsync = ref.watch(scenesStreamProvider);
     final itemsAsync = ref.watch(itemsStreamProvider);
-    final scene = widget.sceneId == null ? null : ref.watch(sceneDetailProvider(widget.sceneId!));
-    final items = itemsAsync.valueOrNull ?? const <Item>[];
+    final scene = widget.sceneId == null
+        ? null
+        : ref.watch(sceneDetailProvider(widget.sceneId!));
+    final allItems = itemsAsync.valueOrNull ?? const <Item>[];
 
     final itemRows = itemsAsync.when<List<Widget>>(
       data: (items) {
@@ -88,8 +90,10 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
       }
       if (scenesAsync.hasError) {
         return CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(middle: Text('Edit Scene')),
-          child: Center(child: Text('Failed to load scene: ${scenesAsync.error}')),
+          navigationBar:
+              const CupertinoNavigationBar(middle: Text('Edit Scene')),
+          child:
+              Center(child: Text('Failed to load scene: ${scenesAsync.error}')),
         );
       }
       if (scene == null) {
@@ -116,7 +120,7 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
         middle: Text(isEditing ? 'Edit Scene' : 'New Scene'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: _isSaving ? null : () => _save(scene),
+          onPressed: _isSaving ? null : () => _save(scene, allItems),
           child: const Text('Save'),
         ),
       ),
@@ -167,8 +171,9 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
     );
   }
 
-  Future<void> _save(Scene? scene) async {
-    final validation = Validators.requiredText(_nameController.text, message: 'Name required');
+  Future<void> _save(Scene? scene, List<Item> allItems) async {
+    final validation =
+        Validators.requiredText(_nameController.text, message: 'Name required');
     if (validation != null) {
       await showCupertinoDialog<void>(
         context: context,
@@ -193,16 +198,20 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
       await actions.createScene(
         name: _nameController.text.trim(),
         type: _type,
-        iconName: _iconController.text.trim().isEmpty ? 'scene' : _iconController.text.trim(),
-        defaultItemIds: _orderedSelectedIds(items),
+        iconName: _iconController.text.trim().isEmpty
+            ? 'scene'
+            : _iconController.text.trim(),
+        defaultItemIds: _orderedSelectedIds(allItems),
         isActive: _isActive,
       );
     } else {
       final updated = scene.copyWith(
         name: _nameController.text.trim(),
         type: _type,
-        iconName: _iconController.text.trim().isEmpty ? scene.iconName : _iconController.text.trim(),
-        defaultItemIds: _orderedSelectedIds(items),
+        iconName: _iconController.text.trim().isEmpty
+            ? scene.iconName
+            : _iconController.text.trim(),
+        defaultItemIds: _orderedSelectedIds(allItems),
         isActive: _isActive,
       );
       await actions.updateScene(updated);
