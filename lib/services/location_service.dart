@@ -20,7 +20,8 @@ class LocationServiceImpl implements LocationService {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
       return null;
     }
 
@@ -34,13 +35,15 @@ class LocationServiceImpl implements LocationService {
   @override
   Future<bool> hasLocationPermission() async {
     final permission = await Geolocator.checkPermission();
-    return permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
   }
 
   @override
   Future<bool> requestLocationPermission() async {
     final permission = await Geolocator.requestPermission();
-    return permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
   }
 
   @override
@@ -94,6 +97,8 @@ class LocationServiceImpl implements LocationService {
       place.administrativeArea,
       place.country,
     ];
-    return parts.where((part) => part != null && part!.trim().isNotEmpty).join(', ');
+    return parts
+        .where((part) => part != null && part.trim().isNotEmpty)
+        .join(', ');
   }
 }

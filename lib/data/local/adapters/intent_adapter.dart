@@ -12,8 +12,8 @@ class IntentAdapter extends TypeAdapter<Intent> {
     final nextStep = reader.read() as String?;
     final tags = reader.readList().cast<String>();
     final isCompleted = reader.readBool();
-    final createdAt = reader.readDateTime();
-    final updatedAt = reader.readDateTime();
+    final createdAt = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
+    final updatedAt = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
     return Intent(
       id: id,
       title: title,
@@ -33,7 +33,7 @@ class IntentAdapter extends TypeAdapter<Intent> {
       ..write(obj.nextStep)
       ..writeList(obj.tags)
       ..writeBool(obj.isCompleted)
-      ..writeDateTime(obj.createdAt)
-      ..writeDateTime(obj.updatedAt);
+      ..writeInt(obj.createdAt.millisecondsSinceEpoch)
+      ..writeInt(obj.updatedAt.millisecondsSinceEpoch);
   }
 }
