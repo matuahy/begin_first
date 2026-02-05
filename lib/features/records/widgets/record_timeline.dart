@@ -5,9 +5,14 @@ import 'package:begin_first/features/records/widgets/record_card.dart';
 import 'package:flutter/cupertino.dart';
 
 class RecordTimeline extends StatelessWidget {
-  const RecordTimeline({required this.records, super.key});
+  const RecordTimeline({
+    required this.records,
+    this.onRecordTap,
+    super.key,
+  });
 
   final List<Record> records;
+  final ValueChanged<Record>? onRecordTap;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +34,7 @@ class RecordTimeline extends StatelessWidget {
         return RecordCard(
           title: record.timestamp.fullDateTime,
           subtitle: subtitle,
+          onTap: onRecordTap == null ? null : () => onRecordTap!(record),
         );
       },
       separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),

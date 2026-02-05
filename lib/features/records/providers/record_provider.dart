@@ -11,6 +11,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final recordDraftProvider = StateProvider<RecordDraft?>((ref) => null);
 
+final recordsStreamProvider = StreamProvider<List<Record>>((ref) {
+  final box = ref.read(hiveBoxesProvider).records;
+  List<Record> buildList() {
+    final records = box.values.toList();
+    records.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return records;
+  }
+
+  Stream<List<Record>> stream() async* {
+    yield buildList();
+    yield* box.watch().map((_) => buildList());
+  }
+
+  return stream();
+});
+
+final recordDetailProvider = StreamProvider.family<Record?, String>((ref, recordId) {
+  final box = ref.read(hiveBoxesProvider).records;
+  Stream<Record?> stream() async* {
+    yield box.get(recordId);
+    yield* box.watch(key: recordId).map((_) => box.get(recordId));
+  }
+
+  return stream();
+});
+
 final latestRecordProvider = Provider.family<Record?, String>((ref, itemId) {
   final records = ref.watch(itemRecordsProvider(itemId)).valueOrNull ?? const <Record>[];
   if (records.isEmpty) {
@@ -106,5 +132,24 @@ class RecordActions {
     }
 
     return record;
+  }
+
+  Future<void> updateRecord(Record record) async {
+    await recordRepository.updateRecord(record);
+  }
+
+  Future<void> deleteRecord(Record record) async {
+    await recordRepository.deleteRecord(record.id);
+    await imageStorageService.deleteImage(record.photoPath);
+
+    final latest = await recordRepository.getLatestRecordByItemId(record.itemId);
+    final item = await itemRepository.getItemById(record.itemId);
+    if (item != null) {
+      final updated = item.copyWith(
+        coverImagePath: latest?.photoPath,
+        updatedAt: DateTime.now(),
+      );
+      await itemRepository.updateItem(updated);
+    }
   }
 }

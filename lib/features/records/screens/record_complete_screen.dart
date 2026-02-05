@@ -42,16 +42,16 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
     if (draft == null) {
       return CupertinoPageScaffold(
         navigationBar: const CupertinoNavigationBar(
-          middle: Text('Complete Record'),
+          middle: Text('补全记录'),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              const Expanded(child: EmptyState(message: 'No draft available.')),
+              const Expanded(child: EmptyState(message: '没有可用草稿')),
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: AppButton(
-                  label: 'Back',
+                  label: '返回',
                   onPressed: () => context.go('/items/${widget.itemId}'),
                 ),
               ),
@@ -63,7 +63,7 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Complete Record'),
+        middle: Text('补全记录'),
       ),
       child: SafeArea(
         child: ListView(
@@ -72,23 +72,23 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
             PhotoViewer(path: draft.tempPhotoPath, height: 200),
             const SizedBox(height: AppSpacing.md),
             CupertinoFormSection.insetGrouped(
-              header: const Text('Details'),
+              header: const Text('详情'),
               children: [
                 CupertinoTextFormFieldRow(
                   controller: _noteController,
-                  placeholder: 'Note',
+                  placeholder: '备注',
                 ),
                 CupertinoTextFormFieldRow(
                   controller: _tagsController,
-                  placeholder: 'Tags (comma separated)',
+                  placeholder: '标签（逗号分隔）',
                 ),
               ],
             ),
             CupertinoFormSection.insetGrouped(
-              header: const Text('Location'),
+              header: const Text('位置'),
               children: [
                 CupertinoFormRow(
-                  prefix: const Text('Attach location'),
+                  prefix: const Text('附加位置'),
                   child: CupertinoSwitch(
                     value: _attachLocation,
                     onChanged: _isLocating ? null : _toggleLocation,
@@ -105,14 +105,14 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
                         ? const CupertinoActivityIndicator()
                         : Text(
                             _location == null
-                                ? 'Location unavailable'
+                                ? '无法获取位置'
                                 : _location!.address ?? '${_location!.latitude}, ${_location!.longitude}',
                           ),
                   ),
               ],
             ),
             AppButton(
-              label: _isSaving ? 'Saving...' : 'Save Record',
+              label: _isSaving ? '保存中...' : '保存记录',
               onPressed: _isSaving ? null : () => _saveRecord(draft),
             ),
           ],
@@ -176,16 +176,16 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
       final goNext = await showCupertinoDialog<bool>(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('Continue'),
-          content: const Text('Record the next item in this scene?'),
+          title: const Text('继续'),
+          content: const Text('继续记录该场景的下一件物品？'),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Finish'),
+              child: const Text('结束'),
             ),
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Next'),
+              child: const Text('下一件'),
             ),
           ],
         ),

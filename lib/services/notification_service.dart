@@ -15,8 +15,21 @@ abstract class NotificationService {
     required String body,
     required DateTime scheduledTime,
   });
+  Future<List<PendingNudge>> getPendingNudges();
   Future<void> cancelNotification(int id);
   Future<void> cancelAllNotifications();
+}
+
+class PendingNudge {
+  const PendingNudge({
+    required this.id,
+    required this.title,
+    required this.body,
+  });
+
+  final int id;
+  final String? title;
+  final String? body;
 }
 
 class NotificationServiceImpl implements NotificationService {
@@ -76,8 +89,8 @@ class NotificationServiceImpl implements NotificationService {
     final scheduled = tz.TZDateTime.from(scheduledTime, tz.local);
     const androidDetails = AndroidNotificationDetails(
       'nudges',
-      'Nudges',
-      channelDescription: 'Light reminders',
+      '顺手提醒',
+      channelDescription: '轻提醒通知',
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
     );
@@ -98,6 +111,20 @@ class NotificationServiceImpl implements NotificationService {
   @override
   Future<void> cancelNotification(int id) async {
     await _plugin.cancel(id);
+  }
+
+  @override
+  Future<List<PendingNudge>> getPendingNudges() async {
+    final pending = await _plugin.pendingNotificationRequests();
+    return pending
+        .map(
+          (request) => PendingNudge(
+            id: request.id,
+            title: request.title,
+            body: request.body,
+          ),
+        )
+        .toList();
   }
 
   @override

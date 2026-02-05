@@ -49,7 +49,7 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
           return const [
             Padding(
               padding: EdgeInsets.all(AppSpacing.md),
-              child: Text('No items available'),
+              child: Text('暂无物品'),
             ),
           ];
         }
@@ -74,7 +74,7 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
       error: (error, stack) => [
         Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
-          child: Text('Failed to load items: $error'),
+          child: Text('加载物品失败：$error'),
         ),
       ],
     );
@@ -82,20 +82,20 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
     if (isEditing) {
       if (scenesAsync.isLoading) {
         return const CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(middle: Text('Edit Scene')),
+          navigationBar: CupertinoNavigationBar(middle: Text('编辑场景')),
           child: Center(child: CupertinoActivityIndicator()),
         );
       }
       if (scenesAsync.hasError) {
         return CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(middle: Text('Edit Scene')),
-          child: Center(child: Text('Failed to load scene: ${scenesAsync.error}')),
+          navigationBar: const CupertinoNavigationBar(middle: Text('编辑场景')),
+          child: Center(child: Text('加载场景失败：${scenesAsync.error}')),
         );
       }
       if (scene == null) {
         return const CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(middle: Text('Edit Scene')),
-          child: Center(child: Text('Scene not found')),
+          navigationBar: CupertinoNavigationBar(middle: Text('编辑场景')),
+          child: Center(child: Text('未找到场景')),
         );
       }
     }
@@ -113,11 +113,11 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text(isEditing ? 'Edit Scene' : 'New Scene'),
+        middle: Text(isEditing ? '编辑场景' : '新建场景'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isSaving ? null : () => _save(scene),
-          child: const Text('Save'),
+          child: const Text('保存'),
         ),
       ),
       child: SafeArea(
@@ -125,18 +125,18 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
             CupertinoFormSection.insetGrouped(
-              header: const Text('Scene Info'),
+              header: const Text('场景信息'),
               children: [
                 CupertinoTextFormFieldRow(
                   controller: _nameController,
-                  placeholder: 'Name',
+                  placeholder: '名称',
                 ),
                 CupertinoTextFormFieldRow(
                   controller: _iconController,
-                  placeholder: 'Icon name',
+                  placeholder: '图标名称',
                 ),
                 CupertinoFormRow(
-                  prefix: const Text('Type'),
+                  prefix: const Text('类型'),
                   child: CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: _selectType,
@@ -144,7 +144,7 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
                   ),
                 ),
                 CupertinoFormRow(
-                  prefix: const Text('Active'),
+                  prefix: const Text('启用'),
                   child: CupertinoSwitch(
                     value: _isActive,
                     onChanged: (value) => setState(() => _isActive = value),
@@ -153,7 +153,7 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
               ],
             ),
             CupertinoFormSection.insetGrouped(
-              header: const Text('Default Items'),
+              header: const Text('默认物品'),
               children: itemRows,
             ),
             if (_isSaving)
@@ -168,16 +168,16 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
   }
 
   Future<void> _save(Scene? scene) async {
-    final validation = Validators.requiredText(_nameController.text, message: 'Name required');
+    final validation = Validators.requiredText(_nameController.text, message: '请填写名称');
     if (validation != null) {
       await showCupertinoDialog<void>(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('Invalid'),
+          title: const Text('提示'),
           content: Text(validation),
           actions: [
             CupertinoDialogAction(
-              child: const Text('OK'),
+              child: const Text('确定'),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -241,7 +241,7 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
       context: context,
       builder: (context) {
         return CupertinoActionSheet(
-          title: const Text('Scene Type'),
+          title: const Text('场景类型'),
           actions: SceneType.values
               .map(
                 (type) => CupertinoActionSheetAction(
@@ -252,7 +252,7 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
               .toList(),
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('取消'),
           ),
         );
       },
@@ -266,17 +266,17 @@ class _SceneFormScreenState extends ConsumerState<SceneFormScreen> {
   String _sceneTypeLabel(SceneType type) {
     switch (type) {
       case SceneType.home:
-        return 'Home';
+        return '家';
       case SceneType.office:
-        return 'Office';
+        return '公司';
       case SceneType.parking:
-        return 'Parking';
+        return '停车';
       case SceneType.travel:
-        return 'Travel';
+        return '旅行';
       case SceneType.temporary:
-        return 'Temporary';
+        return '临时';
       case SceneType.custom:
-        return 'Custom';
+        return '自定义';
     }
   }
 }

@@ -28,7 +28,7 @@ class SceneDetailScreen extends ConsumerWidget {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text(scene?.name ?? 'Scene Detail'),
+        middle: Text(scene?.name ?? '场景详情'),
         trailing: scene == null
             ? null
             : CupertinoButton(
@@ -41,7 +41,7 @@ class SceneDetailScreen extends ConsumerWidget {
         child: scenesAsync.when(
           data: (_) {
             if (scene == null) {
-              return const EmptyState(message: 'Scene not found.');
+              return const EmptyState(message: '未找到场景');
             }
 
             final orderedIds = scene.defaultItemIds;
@@ -58,7 +58,7 @@ class SceneDetailScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.md),
               children: [
                 Text(
-                  '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? 'Active' : 'Inactive'}',
+                  '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? '启用' : '停用'}',
                   style: const TextStyle(color: CupertinoColors.secondaryLabel),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -66,14 +66,14 @@ class SceneDetailScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: AppButton(
-                        label: 'Edit Scene Items',
+                        label: '编辑场景物品',
                         onPressed: () => context.go('/scenes/$sceneId/edit'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: AppButton(
-                        label: 'Start Recording',
+                        label: '开始记录',
                         onPressed: sceneItems.isEmpty
                             ? null
                             : () => _startRecording(context, ref, sceneId, orderedIds, sceneItems),
@@ -82,36 +82,39 @@ class SceneDetailScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                const Text('Items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const Text('物品', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                 const SizedBox(height: AppSpacing.sm),
                 if (itemsAsync.isLoading)
                   const Center(child: CupertinoActivityIndicator())
                 else if (sceneItems.isEmpty)
-                  const EmptyState(message: 'No items in this scene.')
+                  const EmptyState(message: '该场景暂无物品')
                 else
                   ...sceneItems.map(
                     (item) => ItemListTile(
                       title: item.name,
-                      subtitle: 'Tap to record',
+                      subtitle: '点击记录',
                       onTap: () => context.go('/items/${item.id}/record?sceneId=$sceneId'),
                     ),
                   ),
                 const SizedBox(height: AppSpacing.lg),
-                const Text('Scene Records', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const Text('场景记录', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                 const SizedBox(height: AppSpacing.sm),
                 sceneRecordsAsync.when(
                   data: (records) {
                     if (records.isEmpty) {
-                      return const EmptyState(message: 'No records yet.');
+                      return const EmptyState(message: '暂无记录');
                     }
-                    return RecordTimeline(records: records);
+                    return RecordTimeline(
+                      records: records,
+                      onRecordTap: (record) => context.go('/records/${record.id}'),
+                    );
                   },
                   loading: () => const Center(child: CupertinoActivityIndicator()),
-                  error: (error, stack) => EmptyState(message: 'Failed to load records: $error'),
+                  error: (error, stack) => EmptyState(message: '加载记录失败：$error'),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 AppButton(
-                  label: 'Delete Scene',
+                  label: '删除场景',
                   isDestructive: true,
                   onPressed: () => _confirmDelete(context, ref),
                 ),
@@ -119,7 +122,7 @@ class SceneDetailScreen extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CupertinoActivityIndicator()),
-          error: (error, stack) => EmptyState(message: 'Failed to load scene: $error'),
+          error: (error, stack) => EmptyState(message: '加载场景失败：$error'),
         ),
       ),
     );
@@ -129,17 +132,17 @@ class SceneDetailScreen extends ConsumerWidget {
     final result = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Delete Scene'),
-        content: const Text('This will remove the scene. Records remain.'),
+        title: const Text('删除场景'),
+        content: const Text('将删除该场景，记录会保留。'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('取消'),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: const Text('删除'),
           ),
         ],
       ),
@@ -180,17 +183,17 @@ class SceneDetailScreen extends ConsumerWidget {
   String _sceneTypeLabel(SceneType type) {
     switch (type) {
       case SceneType.home:
-        return 'Home';
+        return '家';
       case SceneType.office:
-        return 'Office';
+        return '公司';
       case SceneType.parking:
-        return 'Parking';
+        return '停车';
       case SceneType.travel:
-        return 'Travel';
+        return '旅行';
       case SceneType.temporary:
-        return 'Temporary';
+        return '临时';
       case SceneType.custom:
-        return 'Custom';
+        return '自定义';
     }
   }
 }

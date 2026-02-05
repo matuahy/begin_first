@@ -18,19 +18,19 @@ class BottomTabBar extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(CupertinoIcons.square_list),
-          label: 'Items',
+          label: '物品',
         ),
         BottomNavigationBarItem(
           icon: Icon(CupertinoIcons.square_grid_2x2),
-          label: 'Scenes',
+          label: '场景',
         ),
         BottomNavigationBarItem(
           icon: Icon(CupertinoIcons.hand_draw),
-          label: 'Nudges',
+          label: '顺手',
         ),
         BottomNavigationBarItem(
           icon: Icon(CupertinoIcons.settings),
-          label: 'Settings',
+          label: '设置',
         ),
       ],
     );

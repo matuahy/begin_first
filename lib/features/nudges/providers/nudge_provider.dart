@@ -11,6 +11,32 @@ final randomNudgeProvider = FutureProvider<Intent?>((ref) async {
   return ref.read(nudgeActionsProvider).pickRandomIntent();
 });
 
+final pendingNudgesProvider = FutureProvider<List<PendingNudge>>((ref) async {
+  final notificationService = ref.read(notificationServiceProvider);
+  return notificationService.getPendingNudges();
+});
+
+final nudgeHistoryIdsProvider = StreamProvider<List<String>>((ref) {
+  final box = ref.read(hiveBoxesProvider).nudgeHistory;
+
+  List<String> buildList() {
+    final keys = box.keys.whereType<int>().toList()..sort();
+    final ordered = keys.reversed
+        .map((key) => box.get(key))
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toList();
+    return ordered;
+  }
+
+  Stream<List<String>> stream() async* {
+    yield buildList();
+    yield* box.watch().map((_) => buildList());
+  }
+
+  return stream();
+});
+
 final nudgeActionsProvider = Provider<NudgeActions>((ref) {
   return NudgeActions(
     repository: ref.read(intentRepositoryProvider),
@@ -55,7 +81,7 @@ class NudgeActions {
     await notificationService.scheduleNudgeNotification(
       id: id,
       title: intent.title,
-      body: intent.nextStep ?? 'Small step reminder',
+      body: intent.nextStep ?? '顺手提醒',
       scheduledTime: scheduledTime,
     );
     await _addToHistory(intent.id);

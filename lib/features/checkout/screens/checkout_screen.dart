@@ -29,11 +29,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Checkout'),
+        middle: const Text('出门检查'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: items.isEmpty ? null : _resetChecked,
-          child: const Text('Reset'),
+          child: const Text('重置'),
         ),
       ),
       child: SafeArea(
@@ -48,18 +48,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(selectedScene?.name ?? 'All items'),
+                    Text(selectedScene?.name ?? '全部物品'),
                     const SizedBox(width: AppSpacing.xs),
                     const Icon(CupertinoIcons.chevron_down, size: 16),
                   ],
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
-              Text('$checkedCount / ${items.length} checked', style: const TextStyle(color: CupertinoColors.secondaryLabel)),
+              Text('已勾选 $checkedCount / ${items.length}',
+                  style: const TextStyle(color: CupertinoColors.secondaryLabel)),
               const SizedBox(height: AppSpacing.md),
               Expanded(
                 child: items.isEmpty
-                    ? const EmptyState(message: 'No items to check.')
+                    ? const EmptyState(message: '暂无可检查物品')
                     : ListView.separated(
                         itemCount: items.length,
                         separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
@@ -87,11 +88,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       context: context,
       builder: (context) {
         return CupertinoActionSheet(
-          title: const Text('Select Scene'),
+          title: const Text('选择场景'),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () => Navigator.of(context).pop(allKey),
-              child: const Text('All items'),
+              child: const Text('全部物品'),
             ),
             ...scenes.map(
               (scene) => CupertinoActionSheetAction(
@@ -102,7 +103,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ],
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('取消'),
           ),
         );
       },

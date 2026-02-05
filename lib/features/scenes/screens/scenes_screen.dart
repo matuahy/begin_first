@@ -17,7 +17,7 @@ class ScenesScreen extends ConsumerWidget {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Scenes'),
+        middle: const Text('场景'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => context.go('/scenes/new'),
@@ -32,19 +32,19 @@ class ScenesScreen extends ConsumerWidget {
               return Column(
                 children: [
                   AppButton(
-                    label: 'Checkout',
+                    label: '出门检查',
                     onPressed: () => context.go('/checkout'),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Expanded(
                     child: scenes.isEmpty
-                        ? const EmptyState(message: 'No scenes yet.')
+                        ? const EmptyState(message: '暂无场景')
                         : ListView.separated(
                             itemCount: scenes.length,
                             separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
                             itemBuilder: (context, index) {
                               final scene = scenes[index];
-                              final subtitle = '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? 'Active' : 'Inactive'}';
+                              final subtitle = '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? '启用' : '停用'}';
                               return SceneCard(
                                 title: scene.name,
                                 subtitle: subtitle,
@@ -57,7 +57,7 @@ class ScenesScreen extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CupertinoActivityIndicator()),
-            error: (error, stack) => EmptyState(message: 'Failed to load scenes: $error'),
+            error: (error, stack) => EmptyState(message: '加载场景失败：$error'),
           ),
         ),
       ),
@@ -67,17 +67,17 @@ class ScenesScreen extends ConsumerWidget {
   String _sceneTypeLabel(SceneType type) {
     switch (type) {
       case SceneType.home:
-        return 'Home';
+        return '家';
       case SceneType.office:
-        return 'Office';
+        return '公司';
       case SceneType.parking:
-        return 'Parking';
+        return '停车';
       case SceneType.travel:
-        return 'Travel';
+        return '旅行';
       case SceneType.temporary:
-        return 'Temporary';
+        return '临时';
       case SceneType.custom:
-        return 'Custom';
+        return '自定义';
     }
   }
 }

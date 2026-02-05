@@ -7,6 +7,7 @@ import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:begin_first/shared/widgets/photo_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class RetrieveScreen extends ConsumerWidget {
   const RetrieveScreen({required this.itemId, super.key});
@@ -19,7 +20,7 @@ class RetrieveScreen extends ConsumerWidget {
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Retrieve'),
+        middle: Text('找回'),
       ),
       child: SafeArea(
         child: Padding(
@@ -27,7 +28,7 @@ class RetrieveScreen extends ConsumerWidget {
           child: recordsAsync.when(
             data: (records) {
               if (records.isEmpty) {
-                return const EmptyState(message: 'No records to show.');
+                return const EmptyState(message: '暂无记录');
               }
 
               final latest = records.first;
@@ -39,7 +40,7 @@ class RetrieveScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
                   if (location != null)
                     LocationCard(
-                      title: location.placeName ?? 'Location',
+                      title: location.placeName ?? '位置',
                       subtitle: location.address ?? '${location.latitude}, ${location.longitude}',
                       onTap: () => ref.read(locationServiceProvider).openInMaps(
                             location.latitude,
@@ -48,14 +49,17 @@ class RetrieveScreen extends ConsumerWidget {
                           ),
                     ),
                   const SizedBox(height: AppSpacing.md),
-                  const Text('History', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                  const Text('历史记录', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                   const SizedBox(height: AppSpacing.sm),
-                  RecordTimeline(records: records),
+                  RecordTimeline(
+                    records: records,
+                    onRecordTap: (record) => context.go('/records/${record.id}'),
+                  ),
                 ],
               );
             },
             loading: () => const Center(child: CupertinoActivityIndicator()),
-            error: (error, stack) => EmptyState(message: 'Failed to load records: $error'),
+            error: (error, stack) => EmptyState(message: '加载记录失败：$error'),
           ),
         ),
       ),

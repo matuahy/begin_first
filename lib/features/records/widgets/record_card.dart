@@ -5,15 +5,18 @@ class RecordCard extends StatelessWidget {
   const RecordCard({
     required this.title,
     this.subtitle,
+    this.onTap,
     super.key,
   });
 
   final String title;
   final String? subtitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

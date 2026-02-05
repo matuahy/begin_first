@@ -25,7 +25,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Items'),
+        middle: const Text('物品'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => context.go('/items/new'),
@@ -51,7 +51,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                             .toList();
 
                     if (filtered.isEmpty) {
-                      return const EmptyState(message: 'No items yet.');
+                      return const EmptyState(message: '暂无物品');
                     }
 
                     return ListView.separated(
@@ -69,7 +69,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                     );
                   },
                   loading: () => const Center(child: CupertinoActivityIndicator()),
-                  error: (error, stack) => EmptyState(message: 'Failed to load items: $error'),
+                  error: (error, stack) => EmptyState(message: '加载物品失败：$error'),
                 ),
               ),
             ],
@@ -82,28 +82,28 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
   String _categoryLabel(Category category) {
     switch (category) {
       case Category.keys:
-        return 'Keys';
+        return '钥匙';
       case Category.cards:
-        return 'Cards';
+        return '卡证';
       case Category.digital:
-        return 'Digital';
+        return '数码';
       case Category.documents:
-        return 'Documents';
+        return '证件文件';
       case Category.daily:
-        return 'Daily';
+        return '日常用品';
       case Category.other:
-        return 'Other';
+        return '其他';
     }
   }
 
   String _importanceLabel(Importance importance) {
     switch (importance) {
       case Importance.high:
-        return 'High';
+        return '高';
       case Importance.medium:
-        return 'Medium';
+        return '中';
       case Importance.low:
-        return 'Low';
+        return '低';
     }
   }
 }

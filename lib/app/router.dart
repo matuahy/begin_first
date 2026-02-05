@@ -5,26 +5,29 @@ import 'package:begin_first/features/items/screens/item_form_screen.dart';
 import 'package:begin_first/features/items/screens/items_screen.dart';
 import 'package:begin_first/features/nudges/screens/intent_form_screen.dart';
 import 'package:begin_first/features/nudges/screens/nudges_screen.dart';
-import 'package:begin_first/features/onboarding/screens/welcome_screen.dart';
+import 'package:begin_first/features/onboarding/screens/onboarding_flow_screen.dart';
 import 'package:begin_first/features/records/screens/camera_screen.dart';
 import 'package:begin_first/features/records/screens/record_complete_screen.dart';
+import 'package:begin_first/features/records/screens/record_detail_screen.dart';
 import 'package:begin_first/features/retrieve/screens/retrieve_screen.dart';
 import 'package:begin_first/features/scenes/screens/scene_detail_screen.dart';
 import 'package:begin_first/features/scenes/screens/scene_form_screen.dart';
 import 'package:begin_first/features/scenes/screens/scenes_screen.dart';
 import 'package:begin_first/features/settings/screens/settings_screen.dart';
+import 'package:begin_first/features/settings/providers/settings_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-final isFirstLaunchProvider = StateProvider<bool>((ref) => false);
-
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final isFirstLaunch = ref.watch(isFirstLaunchProvider);
+  final isFirstLaunch = ref.watch(appSettingsProvider.select((settings) => settings.isFirstLaunch));
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
       if (isFirstLaunch && state.uri.path != '/onboarding') {
         return '/onboarding';
+      }
+      if (!isFirstLaunch && state.uri.path == '/onboarding') {
+        return '/items';
       }
       return null;
     },
@@ -155,11 +158,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const WelcomeScreen(),
+        builder: (context, state) => const OnboardingFlowScreen(),
       ),
       GoRoute(
         path: '/checkout',
         builder: (context, state) => const CheckoutScreen(),
+      ),
+      GoRoute(
+        path: '/records/:id',
+        builder: (context, state) {
+          final recordId = state.pathParameters['id']!;
+          return RecordDetailScreen(recordId: recordId);
+        },
       ),
     ],
   );

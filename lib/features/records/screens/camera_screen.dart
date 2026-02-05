@@ -30,7 +30,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
         : null;
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Record Photo'),
+        middle: Text('拍照记录'),
       ),
       child: SafeArea(
         child: Padding(
@@ -39,7 +39,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (progress != null) ...[
-                Text('Scene recording $progress',
+                Text('场景记录 $progress',
                     style: const TextStyle(color: CupertinoColors.secondaryLabel)),
                 const SizedBox(height: AppSpacing.sm),
               ],
@@ -50,12 +50,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                 ),
               const SizedBox(height: AppSpacing.md),
               AppButton(
-                label: _isLoading ? 'Loading...' : 'Take Photo',
+                label: _isLoading ? '处理中...' : '拍照',
                 onPressed: _isLoading ? null : _takePhoto,
               ),
               const SizedBox(height: AppSpacing.sm),
               AppButton(
-                label: _isLoading ? 'Loading...' : 'Pick from Gallery',
+                label: _isLoading ? '处理中...' : '从相册选择',
                 onPressed: _isLoading ? null : _pickFromGallery,
               ),
             ],
@@ -75,7 +75,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     if (!permissionGranted) {
       setState(() {
         _isLoading = false;
-        _error = 'Camera permission denied';
+        _error = '相机权限被拒绝';
       });
       return;
     }
@@ -98,7 +98,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     if (path == null || path.isEmpty) {
       setState(() {
         _isLoading = false;
-        _error = 'No photo selected';
+        _error = '未选择照片';
       });
       return;
     }

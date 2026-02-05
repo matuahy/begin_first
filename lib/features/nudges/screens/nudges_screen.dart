@@ -1,3 +1,4 @@
+import 'package:begin_first/app/providers.dart';
 import 'package:begin_first/app/theme.dart';
 import 'package:begin_first/domain/models/intent.dart';
 import 'package:begin_first/features/nudges/providers/intents_provider.dart';
@@ -5,6 +6,7 @@ import 'package:begin_first/features/nudges/providers/nudge_provider.dart';
 import 'package:begin_first/features/nudges/widgets/intent_list_tile.dart';
 import 'package:begin_first/features/nudges/widgets/nudge_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
+import 'package:begin_first/services/notification_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,10 +18,12 @@ class NudgesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final intentsAsync = ref.watch(intentsStreamProvider);
     final randomNudgeAsync = ref.watch(randomNudgeProvider);
+    final pendingAsync = ref.watch(pendingNudgesProvider);
+    final historyAsync = ref.watch(nudgeHistoryIdsProvider);
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Nudges'),
+        middle: const Text('顺手'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => context.go('/nudges/new'),
@@ -33,7 +37,7 @@ class NudgesScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Random Nudge', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const Text('随机提醒', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: () => ref.invalidate(randomNudgeProvider),
@@ -44,7 +48,7 @@ class NudgesScreen extends ConsumerWidget {
             randomNudgeAsync.when(
               data: (intent) {
                 if (intent == null) {
-                  return const EmptyState(message: 'No active intents yet.');
+                  return const EmptyState(message: '暂无可用意图');
                 }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,15 +60,74 @@ class NudgesScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, stack) => EmptyState(message: 'Failed to load nudge: $error'),
+              error: (error, stack) => EmptyState(message: '加载提醒失败：$error'),
             ),
             const SizedBox(height: AppSpacing.lg),
-            const Text('Intents', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('已安排', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () async {
+                    await ref.read(notificationServiceProvider).cancelAllNotifications();
+                    ref.invalidate(pendingNudgesProvider);
+                  },
+                  child: const Text('全部取消'),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            pendingAsync.when(
+              data: (pending) {
+                if (pending.isEmpty) {
+                  return const EmptyState(message: '暂无已安排提醒');
+                }
+                return Column(
+                  children: pending
+                      .map(
+                        (nudge) => _PendingNudgeTile(nudge: nudge),
+                      )
+                      .toList(),
+                );
+              },
+              loading: () => const Center(child: CupertinoActivityIndicator()),
+              error: (error, stack) => EmptyState(message: '加载已安排提醒失败：$error'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            const Text('历史', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const SizedBox(height: AppSpacing.sm),
+            historyAsync.when(
+              data: (ids) {
+                final intents = intentsAsync.valueOrNull ?? const <Intent>[];
+                final intentMap = {for (final intent in intents) intent.id: intent};
+                final historyIntents = ids.map((id) => intentMap[id]).whereType<Intent>().toList();
+
+                if (historyIntents.isEmpty) {
+                  return const EmptyState(message: '暂无历史');
+                }
+
+                return Column(
+                  children: historyIntents
+                      .map(
+                        (intent) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: NudgeCard(title: intent.title, subtitle: intent.nextStep),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
+              loading: () => const Center(child: CupertinoActivityIndicator()),
+              error: (error, stack) => EmptyState(message: '加载历史失败：$error'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            const Text('意图', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: AppSpacing.sm),
             intentsAsync.when(
               data: (intents) {
                 if (intents.isEmpty) {
-                  return const EmptyState(message: 'No intents yet.');
+                  return const EmptyState(message: '暂无意图');
                 }
                 final active = intents.where((intent) => !intent.isCompleted).toList();
                 final completed = intents.where((intent) => intent.isCompleted).toList();
@@ -73,13 +136,13 @@ class NudgesScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (active.isNotEmpty) ...[
-                      const Text('Active', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const Text('进行中', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: AppSpacing.sm),
                       ...active.map((intent) => _IntentTile(intent: intent)),
                       const SizedBox(height: AppSpacing.lg),
                     ],
                     if (completed.isNotEmpty) ...[
-                      const Text('Completed', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const Text('已完成', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: AppSpacing.sm),
                       ...completed.map((intent) => _IntentTile(intent: intent)),
                     ],
@@ -87,7 +150,7 @@ class NudgesScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, stack) => EmptyState(message: 'Failed to load intents: $error'),
+              error: (error, stack) => EmptyState(message: '加载意图失败：$error'),
             ),
           ],
         ),
@@ -139,22 +202,22 @@ class _ScheduleRow extends ConsumerWidget {
         CupertinoButton.filled(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           onPressed: () => _schedule(context, ref, intent, const Duration(minutes: 30)),
-          child: const Text('30 min'),
+          child: const Text('30分钟'),
         ),
         CupertinoButton.filled(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           onPressed: () => _schedule(context, ref, intent, const Duration(hours: 2)),
-          child: const Text('2 hours'),
+          child: const Text('2小时'),
         ),
         CupertinoButton.filled(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           onPressed: () => _scheduleTonight(context, ref, intent),
-          child: const Text('Tonight 9pm'),
+          child: const Text('今晚9点'),
         ),
         CupertinoButton(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           onPressed: () => _pickCustom(context, ref, intent),
-          child: const Text('Pick time'),
+          child: const Text('选择时间'),
         ),
       ],
     );
@@ -202,12 +265,12 @@ class _ScheduleRow extends ConsumerWidget {
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 child: CupertinoButton.filled(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Schedule'),
+                  child: const Text('安排'),
                 ),
               ),
               CupertinoButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: const Text('取消'),
               ),
             ],
           ),
@@ -230,22 +293,48 @@ class _ScheduleRow extends ConsumerWidget {
           intent: intent,
           scheduledTime: time,
         );
+    ref.invalidate(pendingNudgesProvider);
     if (!context.mounted) {
       return;
     }
     await showCupertinoDialog<void>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: Text(success ? 'Scheduled' : 'Permission Needed'),
+        title: Text(success ? '已安排' : '需要权限'),
         content: Text(
-          success ? 'Reminder scheduled.' : 'Notification permission is required.',
+          success ? '提醒已安排。' : '需要通知权限。',
         ),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: const Text('确定'),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PendingNudgeTile extends ConsumerWidget {
+  const _PendingNudgeTile({required this.nudge});
+
+  final PendingNudge nudge;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: NudgeCard(
+        title: nudge.title ?? '提醒',
+        subtitle: nudge.body,
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () async {
+            await ref.read(notificationServiceProvider).cancelNotification(nudge.id);
+            ref.invalidate(pendingNudgesProvider);
+          },
+          child: const Icon(CupertinoIcons.xmark_circle),
+        ),
       ),
     );
   }

@@ -41,20 +41,20 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
     if (isEditing) {
       if (intentsAsync.isLoading) {
         return const CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(middle: Text('Edit Intent')),
+          navigationBar: CupertinoNavigationBar(middle: Text('编辑意图')),
           child: Center(child: CupertinoActivityIndicator()),
         );
       }
       if (intentsAsync.hasError) {
         return CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(middle: Text('Edit Intent')),
-          child: Center(child: Text('Failed to load intent: ${intentsAsync.error}')),
+          navigationBar: const CupertinoNavigationBar(middle: Text('编辑意图')),
+          child: Center(child: Text('加载意图失败：${intentsAsync.error}')),
         );
       }
       if (intent == null) {
         return const CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(middle: Text('Edit Intent')),
-          child: Center(child: Text('Intent not found')),
+          navigationBar: CupertinoNavigationBar(middle: Text('编辑意图')),
+          child: Center(child: Text('未找到意图')),
         );
       }
     }
@@ -69,11 +69,11 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text(isEditing ? 'Edit Intent' : 'New Intent'),
+        middle: Text(isEditing ? '编辑意图' : '新建意图'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isSaving ? null : () => _save(intent),
-          child: const Text('Save'),
+          child: const Text('保存'),
         ),
       ),
       child: SafeArea(
@@ -81,22 +81,22 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
             CupertinoFormSection.insetGrouped(
-              header: const Text('Intent'),
+              header: const Text('意图'),
               children: [
                 CupertinoTextFormFieldRow(
                   controller: _titleController,
-                  placeholder: 'Title',
+                  placeholder: '标题',
                 ),
                 CupertinoTextFormFieldRow(
                   controller: _nextStepController,
-                  placeholder: 'Next step',
+                  placeholder: '下一步',
                 ),
                 CupertinoTextFormFieldRow(
                   controller: _tagsController,
-                  placeholder: 'Tags (comma separated)',
+                  placeholder: '标签（逗号分隔）',
                 ),
                 CupertinoFormRow(
-                  prefix: const Text('Completed'),
+                  prefix: const Text('已完成'),
                   child: CupertinoSwitch(
                     value: _isCompleted,
                     onChanged: (value) => setState(() => _isCompleted = value),
@@ -112,7 +112,7 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
             if (intent != null) ...[
               const SizedBox(height: AppSpacing.lg),
               AppButton(
-                label: 'Delete Intent',
+                label: '删除意图',
                 isDestructive: true,
                 onPressed: () => _confirmDelete(intent),
               ),
@@ -124,16 +124,16 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
   }
 
   Future<void> _save(Intent? intent) async {
-    final validation = Validators.requiredText(_titleController.text, message: 'Title required');
+    final validation = Validators.requiredText(_titleController.text, message: '请填写标题');
     if (validation != null) {
       await showCupertinoDialog<void>(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('Invalid'),
+          title: const Text('提示'),
           content: Text(validation),
           actions: [
             CupertinoDialogAction(
-              child: const Text('OK'),
+              child: const Text('确定'),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -176,17 +176,17 @@ class _IntentFormScreenState extends ConsumerState<IntentFormScreen> {
     final result = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Delete Intent'),
-        content: const Text('This intent will be removed.'),
+        title: const Text('删除意图'),
+        content: const Text('该意图将被删除。'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('取消'),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: const Text('删除'),
           ),
         ],
       ),

@@ -8,12 +8,12 @@ class SelectItemsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Select Items'),
+        middle: Text('选择物品'),
       ),
       child: const SafeArea(
         child: OnboardingPage(
-          title: 'Pick your essentials',
-          description: 'Choose items you want to track first.',
+          title: '选择常用物品',
+          description: '先选择想要记录的物品。',
         ),
       ),
     );

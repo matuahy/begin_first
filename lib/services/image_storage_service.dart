@@ -9,6 +9,7 @@ abstract class ImageStorageService {
   Future<String> getImageDirectory();
   Future<String> compressImage(String sourcePath, {int quality = 80});
   Future<String> getThumbnail(String sourcePath);
+  Future<int> cleanupUnusedImages(Set<String> inUsePaths);
 }
 
 class ImageStorageServiceImpl implements ImageStorageService {
@@ -66,6 +67,24 @@ class ImageStorageServiceImpl implements ImageStorageService {
       minHeight: 320,
     );
     return result?.path ?? sourcePath;
+  }
+
+  @override
+  Future<int> cleanupUnusedImages(Set<String> inUsePaths) async {
+    final imageDir = await getImageDirectory();
+    final dir = Directory(imageDir);
+    if (!await dir.exists()) {
+      return 0;
+    }
+    final files = dir.listSync().whereType<File>().toList();
+    var removed = 0;
+    for (final file in files) {
+      if (!inUsePaths.contains(file.path)) {
+        await file.delete();
+        removed += 1;
+      }
+    }
+    return removed;
   }
 
   String _buildFileName({required String prefix}) {

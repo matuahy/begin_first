@@ -8,12 +8,12 @@ class SelectScenesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Select Scenes'),
+        middle: Text('选择场景'),
       ),
       child: const SafeArea(
         child: OnboardingPage(
-          title: 'Set your scenes',
-          description: 'Define common places like home or office.',
+          title: '设置场景',
+          description: '定义常用场景，如家或公司。',
         ),
       ),
     );

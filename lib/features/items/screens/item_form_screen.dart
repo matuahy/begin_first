@@ -39,20 +39,20 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     if (isEditing) {
       if (itemsAsync.isLoading) {
         return const CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(middle: Text('Edit Item')),
+          navigationBar: CupertinoNavigationBar(middle: Text('编辑物品')),
           child: Center(child: CupertinoActivityIndicator()),
         );
       }
       if (itemsAsync.hasError) {
         return CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(middle: Text('Edit Item')),
-          child: Center(child: Text('Failed to load item: ${itemsAsync.error}')),
+          navigationBar: const CupertinoNavigationBar(middle: Text('编辑物品')),
+          child: Center(child: Text('加载物品失败：${itemsAsync.error}')),
         );
       }
       if (item == null) {
         return const CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(middle: Text('Edit Item')),
-          child: Center(child: Text('Item not found')),
+          navigationBar: CupertinoNavigationBar(middle: Text('编辑物品')),
+          child: Center(child: Text('未找到物品')),
         );
       }
     }
@@ -66,11 +66,11 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text(isEditing ? 'Edit Item' : 'New Item'),
+        middle: Text(isEditing ? '编辑物品' : '新建物品'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isSaving ? null : () => _save(itemId: widget.itemId),
-          child: const Text('Save'),
+          child: const Text('保存'),
         ),
       ),
       child: SafeArea(
@@ -78,14 +78,14 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
             CupertinoFormSection.insetGrouped(
-              header: const Text('Item Info'),
+              header: const Text('物品信息'),
               children: [
                 CupertinoTextFormFieldRow(
                   controller: _nameController,
-                  placeholder: 'Name',
+                  placeholder: '名称',
                 ),
                 CupertinoFormRow(
-                  prefix: const Text('Category'),
+                  prefix: const Text('类别'),
                   child: CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: _selectCategory,
@@ -93,7 +93,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                   ),
                 ),
                 CupertinoFormRow(
-                  prefix: const Text('Importance'),
+                  prefix: const Text('重要程度'),
                   child: CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: _selectImportance,
@@ -114,16 +114,16 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   }
 
   Future<void> _save({String? itemId}) async {
-    final validation = Validators.requiredText(_nameController.text, message: 'Name required');
+    final validation = Validators.requiredText(_nameController.text, message: '请填写名称');
     if (validation != null) {
       await showCupertinoDialog<void>(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('Invalid'),
+          title: const Text('提示'),
           content: Text(validation),
           actions: [
             CupertinoDialogAction(
-              child: const Text('OK'),
+              child: const Text('确定'),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -163,7 +163,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       context: context,
       builder: (context) {
         return CupertinoActionSheet(
-          title: const Text('Category'),
+          title: const Text('选择类别'),
           actions: Category.values
               .map(
                 (category) => CupertinoActionSheetAction(
@@ -174,7 +174,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               .toList(),
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('取消'),
           ),
         );
       },
@@ -190,7 +190,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       context: context,
       builder: (context) {
         return CupertinoActionSheet(
-          title: const Text('Importance'),
+          title: const Text('选择重要程度'),
           actions: Importance.values
               .map(
                 (importance) => CupertinoActionSheetAction(
@@ -201,7 +201,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               .toList(),
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('取消'),
           ),
         );
       },
@@ -215,28 +215,28 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   String _categoryLabel(Category category) {
     switch (category) {
       case Category.keys:
-        return 'Keys';
+        return '钥匙';
       case Category.cards:
-        return 'Cards';
+        return '卡证';
       case Category.digital:
-        return 'Digital';
+        return '数码';
       case Category.documents:
-        return 'Documents';
+        return '证件文件';
       case Category.daily:
-        return 'Daily';
+        return '日常用品';
       case Category.other:
-        return 'Other';
+        return '其他';
     }
   }
 
   String _importanceLabel(Importance importance) {
     switch (importance) {
       case Importance.high:
-        return 'High';
+        return '高';
       case Importance.medium:
-        return 'Medium';
+        return '中';
       case Importance.low:
-        return 'Low';
+        return '低';
     }
   }
 }
