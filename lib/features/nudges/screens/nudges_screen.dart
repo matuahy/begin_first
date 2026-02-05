@@ -27,7 +27,7 @@ class NudgesScreen extends ConsumerWidget {
         middle: const Text('顺手'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () => context.go('/nudges/new'),
+          onPressed: () => context.push('/nudges/new'),
           child: const Icon(CupertinoIcons.add),
         ),
       ),
@@ -252,7 +252,7 @@ class _IntentTile extends ConsumerWidget {
         title: intent.title,
         subtitle: subtitle,
         isCompleted: intent.isCompleted,
-        onTap: () => context.go('/nudges/${intent.id}/edit'),
+        onTap: () => context.push('/nudges/${intent.id}/edit'),
         onCompletedChanged: (value) =>
             ref.read(intentActionsProvider).setCompleted(intent, value),
       ),

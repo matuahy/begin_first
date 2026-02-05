@@ -21,7 +21,7 @@ class ScenesScreen extends ConsumerWidget {
         middle: const Text('场景'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () => context.go('/scenes/new'),
+          onPressed: () => context.push('/scenes/new'),
           child: const Icon(CupertinoIcons.add),
         ),
       ),
@@ -50,7 +50,7 @@ class ScenesScreen extends ConsumerWidget {
                           AppButton(
                             label: '开始出门检查',
                             leadingIcon: CupertinoIcons.check_mark_circled,
-                            onPressed: () => context.go('/checkout'),
+                            onPressed: () => context.push('/checkout'),
                           ),
                         ],
                       ),
@@ -60,7 +60,7 @@ class ScenesScreen extends ConsumerWidget {
                       child: scenes.isEmpty
                           ? EmptyState(
                               title: '还没有场景',
-                              message: '创建“回家”“公司”“下车”等场景后，可连续记录。',
+                              message: '创建"回家""公司""下车"等场景后，可连续记录。',
                               icon: CupertinoIcons.square_grid_2x2,
                               actionLabel: '新建场景',
                               onAction: () => context.go('/scenes/new'),
@@ -75,7 +75,7 @@ class ScenesScreen extends ConsumerWidget {
                                 return SceneCard(
                                   title: scene.name,
                                   subtitle: subtitle,
-                                  onTap: () => context.go('/scenes/${scene.id}'),
+                                  onTap: () => context.push('/scenes/${scene.id}'),
                                 );
                               },
                             ),

@@ -40,7 +40,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
             ? null
             : CupertinoButton(
                 padding: EdgeInsets.zero,
-                onPressed: () => context.go('/items/${widget.itemId}/edit'),
+                onPressed: () => context.push('/items/${widget.itemId}/edit'),
                 child: const Icon(CupertinoIcons.pencil),
               ),
       ),
@@ -73,7 +73,8 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                       icon: CupertinoIcons.pencil_outline,
                       title: '添加记录',
                       subtitle: '记录这件物品的存放位置',
-                      onTap: () => context.go('/items/${widget.itemId}/record'),
+                      onTap: () =>
+                          context.push('/items/${widget.itemId}/record'),
                     ),
                     ActionButtonCard(
                       icon: CupertinoIcons.location,
@@ -81,7 +82,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                       subtitle: '查看存放位置，快速定位',
                       iconColor: AppColors.success,
                       onTap: () =>
-                          context.go('/items/${widget.itemId}/retrieve'),
+                          context.push('/items/${widget.itemId}/retrieve'),
                     ),
                   ],
                 ),
@@ -207,13 +208,13 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                     message: '添加第一条记录，开始追踪这件物品',
                     actionLabel: '添加记录',
                     onAction: () =>
-                        context.go('/items/${widget.itemId}/record'),
+                        context.push('/items/${widget.itemId}/record'),
                   ),
                 );
               }
               return RecordTimeline(
                 records: filtered,
-                onRecordTap: (record) => context.go('/records/${record.id}'),
+                onRecordTap: (record) => context.push('/records/${record.id}'),
               );
             },
             loading: () => const Padding(

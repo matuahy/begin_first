@@ -34,7 +34,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
         middle: const Text('物品'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () => context.go('/items/new'),
+          onPressed: () => context.push('/items/new'),
           child: const Icon(CupertinoIcons.add),
         ),
       ),
@@ -119,7 +119,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                           return ItemListTile(
                             title: item.name,
                             subtitle: subtitle,
-                            onTap: () => context.go('/items/${item.id}'),
+                            onTap: () => context.push('/items/${item.id}'),
                           );
                         },
                       );

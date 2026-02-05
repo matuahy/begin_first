@@ -34,7 +34,7 @@ class SceneDetailScreen extends ConsumerWidget {
             ? null
             : CupertinoButton(
                 padding: EdgeInsets.zero,
-                onPressed: () => context.go('/scenes/$sceneId/edit'),
+                onPressed: () => context.push('/scenes/$sceneId/edit'),
                 child: const Icon(CupertinoIcons.pencil),
               ),
       ),
@@ -83,7 +83,7 @@ class SceneDetailScreen extends ConsumerWidget {
                                 label: '编辑场景',
                                 leadingIcon: CupertinoIcons.pencil,
                                 variant: AppButtonVariant.secondary,
-                                onPressed: () => context.go('/scenes/$sceneId/edit'),
+                                onPressed: () => context.push('/scenes/$sceneId/edit'),
                               ),
                             ),
                             const SizedBox(width: AppSpacing.sm),
@@ -139,7 +139,7 @@ class SceneDetailScreen extends ConsumerWidget {
                       }
                       return RecordTimeline(
                         records: records,
-                        onRecordTap: (record) => context.go('/records/${record.id}'),
+                        onRecordTap: (record) => context.push('/records/${record.id}'),
                       );
                     },
                     loading: () => const Center(child: CupertinoActivityIndicator()),

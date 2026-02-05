@@ -71,7 +71,7 @@ class RetrieveScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                     RecordTimeline(
                       records: records,
-                      onRecordTap: (record) => context.go('/records/${record.id}'),
+                      onRecordTap: (record) => context.push('/records/${record.id}'),
                     ),
                   ],
                 );
