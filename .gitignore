@@ -26,3 +26,4 @@ linux/flutter/ephemeral/
 windows/flutter/ephemeral/
 
 .history/
+.qoder/
