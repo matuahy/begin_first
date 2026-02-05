@@ -35,6 +35,22 @@ final itemRecordsProvider = StreamProvider.family<List<Record>, String>((ref, it
   return stream();
 });
 
+final sceneRecordsProvider = StreamProvider.family<List<Record>, String>((ref, sceneId) {
+  final box = ref.read(hiveBoxesProvider).records;
+  List<Record> buildList() {
+    final records = box.values.where((record) => record.sceneId == sceneId).toList();
+    records.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return records;
+  }
+
+  Stream<List<Record>> stream() async* {
+    yield buildList();
+    yield* box.watch().map((_) => buildList());
+  }
+
+  return stream();
+});
+
 final recordActionsProvider = Provider<RecordActions>((ref) {
   return RecordActions(
     recordRepository: ref.read(recordRepositoryProvider),
@@ -71,7 +87,7 @@ class RecordActions {
     final record = Record(
       id: IdGenerator.newId(),
       itemId: draft.itemId,
-      sceneId: null,
+      sceneId: draft.sceneId,
       photoPath: storedPath,
       timestamp: draft.timestamp,
       location: location ?? draft.location,

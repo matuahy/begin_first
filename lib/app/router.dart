@@ -10,6 +10,7 @@ import 'package:begin_first/features/records/screens/camera_screen.dart';
 import 'package:begin_first/features/records/screens/record_complete_screen.dart';
 import 'package:begin_first/features/retrieve/screens/retrieve_screen.dart';
 import 'package:begin_first/features/scenes/screens/scene_detail_screen.dart';
+import 'package:begin_first/features/scenes/screens/scene_form_screen.dart';
 import 'package:begin_first/features/scenes/screens/scenes_screen.dart';
 import 'package:begin_first/features/settings/screens/settings_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,7 +66,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         path: 'record',
                         builder: (context, state) {
                           final itemId = state.pathParameters['id']!;
-                          return CameraScreen(itemId: itemId);
+                          final sceneId = state.uri.queryParameters['sceneId'];
+                          return CameraScreen(itemId: itemId, sceneId: sceneId);
                         },
                         routes: [
                           GoRoute(
@@ -97,11 +99,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) => const ScenesScreen(),
                 routes: [
                   GoRoute(
+                    path: 'new',
+                    builder: (context, state) => const SceneFormScreen(),
+                  ),
+                  GoRoute(
                     path: ':id',
                     builder: (context, state) {
                       final sceneId = state.pathParameters['id']!;
                       return SceneDetailScreen(sceneId: sceneId);
                     },
+                    routes: [
+                      GoRoute(
+                        path: 'edit',
+                        builder: (context, state) {
+                          final sceneId = state.pathParameters['id']!;
+                          return SceneFormScreen(sceneId: sceneId);
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

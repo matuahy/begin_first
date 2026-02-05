@@ -3,6 +3,7 @@ import 'package:begin_first/app/theme.dart';
 import 'package:begin_first/domain/models/location_info.dart';
 import 'package:begin_first/features/records/models/record_draft.dart';
 import 'package:begin_first/features/records/providers/record_provider.dart';
+import 'package:begin_first/features/scenes/providers/scene_record_provider.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:begin_first/shared/widgets/photo_viewer.dart';
@@ -156,9 +157,59 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
         );
 
     ref.read(recordDraftProvider.notifier).state = null;
-    if (mounted) {
-      setState(() => _isSaving = false);
-      context.go('/items/${widget.itemId}');
+    if (!mounted) {
+      return;
     }
+
+    final session = ref.read(sceneRecordSessionProvider);
+    if (session != null && session.sceneId == draft.sceneId && session.currentItemId == draft.itemId) {
+      await _handleSceneSession(session);
+      return;
+    }
+
+    setState(() => _isSaving = false);
+    context.go('/items/${widget.itemId}');
+  }
+
+  Future<void> _handleSceneSession(SceneRecordSession session) async {
+    if (session.hasNext) {
+      final goNext = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Continue'),
+          content: const Text('Record the next item in this scene?'),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Finish'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Next'),
+            ),
+          ],
+        ),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (goNext == true) {
+        final nextItemId = ref.read(sceneRecordSessionProvider.notifier).advance();
+        setState(() => _isSaving = false);
+        if (nextItemId == null) {
+          ref.read(sceneRecordSessionProvider.notifier).end();
+          context.go('/scenes/${session.sceneId}');
+        } else {
+          context.go('/items/$nextItemId/record?sceneId=${session.sceneId}');
+        }
+        return;
+      }
+    }
+
+    ref.read(sceneRecordSessionProvider.notifier).end();
+    setState(() => _isSaving = false);
+    context.go('/scenes/${session.sceneId}');
   }
 }
