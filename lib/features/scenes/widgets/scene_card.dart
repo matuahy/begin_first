@@ -1,3 +1,4 @@
+import 'package:begin_first/app/theme.dart';
 import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -20,11 +21,17 @@ class SceneCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 16)),
+          Row(
+            children: [
+              const Icon(CupertinoIcons.square_grid_2x2, size: 18, color: AppColors.primary),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: Text(title, style: AppTextStyles.body)),
+            ],
+          ),
           if (subtitle != null)
-            Text(
-              subtitle!,
-              style: const TextStyle(color: CupertinoColors.secondaryLabel),
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs, left: 26),
+              child: Text(subtitle!, style: AppTextStyles.bodyMuted),
             ),
         ],
       ),

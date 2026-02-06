@@ -21,12 +21,12 @@ class ItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 16)),
+          Text(title, style: AppTextStyles.body),
           if (subtitle != null) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
               subtitle!,
-              style: const TextStyle(color: CupertinoColors.secondaryLabel),
+              style: AppTextStyles.bodyMuted,
             ),
           ],
         ],

@@ -15,19 +15,22 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),
-          const SizedBox(height: AppSpacing.sm),
-          Text(description, style: const TextStyle(fontSize: 16)),
-          if (child != null) ...[
-            const SizedBox(height: AppSpacing.lg),
-            child!,
+    return DecoratedBox(
+      decoration: AppDecorations.page,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: AppTextStyles.title),
+            const SizedBox(height: AppSpacing.sm),
+            Text(description, style: AppTextStyles.bodyMuted),
+            if (child != null) ...[
+              const SizedBox(height: AppSpacing.lg),
+              child!,
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

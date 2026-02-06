@@ -4,6 +4,7 @@ import 'package:begin_first/features/records/models/record_draft.dart';
 import 'package:begin_first/features/records/providers/record_provider.dart';
 import 'package:begin_first/features/scenes/providers/scene_record_provider.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,32 +34,49 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
         middle: Text('拍照记录'),
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (progress != null) ...[
-                Text('场景记录 $progress',
-                    style: const TextStyle(color: CupertinoColors.secondaryLabel)),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-              if (_error != null)
-                Text(
-                  _error!,
-                  style: const TextStyle(color: CupertinoColors.systemRed),
+        child: DecoratedBox(
+          decoration: AppDecorations.page,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppCard(
+                  isEmphasized: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('记录当前摆放位置', style: AppTextStyles.heading),
+                      const SizedBox(height: AppSpacing.xs),
+                      if (progress != null)
+                        Text('场景记录进度：$progress', style: AppTextStyles.bodyMuted)
+                      else
+                        const Text('拍完自动保存，后续可补充备注和标签。', style: AppTextStyles.bodyMuted),
+                    ],
+                  ),
                 ),
-              const SizedBox(height: AppSpacing.md),
-              AppButton(
-                label: _isLoading ? '处理中...' : '拍照',
-                onPressed: _isLoading ? null : _takePhoto,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppButton(
-                label: _isLoading ? '处理中...' : '从相册选择',
-                onPressed: _isLoading ? null : _pickFromGallery,
-              ),
-            ],
+                if (_error != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    _error!,
+                    style: AppTextStyles.body.copyWith(color: AppColors.error),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.md),
+                AppButton(
+                  label: _isLoading ? '处理中...' : '直接拍照',
+                  leadingIcon: CupertinoIcons.camera,
+                  onPressed: _isLoading ? null : _takePhoto,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppButton(
+                  label: _isLoading ? '处理中...' : '从相册选择',
+                  leadingIcon: CupertinoIcons.photo,
+                  variant: AppButtonVariant.secondary,
+                  onPressed: _isLoading ? null : _pickFromGallery,
+                ),
+              ],
+            ),
           ),
         ),
       ),

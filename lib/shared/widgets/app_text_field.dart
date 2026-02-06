@@ -7,6 +7,8 @@ class AppTextField extends StatelessWidget {
     this.placeholder,
     this.onChanged,
     this.keyboardType,
+    this.prefixIcon,
+    this.suffix,
     this.maxLines = 1,
     super.key,
   });
@@ -15,6 +17,8 @@ class AppTextField extends StatelessWidget {
   final String? placeholder;
   final ValueChanged<String>? onChanged;
   final TextInputType? keyboardType;
+  final IconData? prefixIcon;
+  final Widget? suffix;
   final int maxLines;
 
   @override
@@ -25,7 +29,26 @@ class AppTextField extends StatelessWidget {
       onChanged: onChanged,
       keyboardType: keyboardType,
       maxLines: maxLines,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 13),
+      prefix: prefixIcon == null
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.md),
+              child: Icon(prefixIcon, size: 18, color: AppColors.textSecondary),
+            ),
+      suffix: suffix == null
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.md),
+              child: suffix,
+            ),
+      placeholderStyle: AppTextStyles.bodyMuted,
+      style: AppTextStyles.body,
+      decoration: BoxDecoration(
+        color: AppColors.secondaryBackground,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.border),
+      ),
     );
   }
 }

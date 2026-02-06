@@ -36,17 +36,34 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('欢迎'),
-        trailing: _pageIndex < 2
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _nextPage,
-                child: const Text('下一步'),
-              )
-            : null,
       ),
       child: SafeArea(
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: SizedBox(
+                  height: 6,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(color: AppColors.groupedBackground),
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: (_pageIndex + 1) / 3,
+                        child: const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: [AppColors.primary, AppColors.primaryStrong]),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: PageView(
                 controller: _controller,
@@ -63,8 +80,9 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
               child: Row(
                 children: [
                   Expanded(
-                child: AppButton(
+                    child: AppButton(
                       label: _pageIndex < 2 ? '下一步' : (_isSaving ? '保存中...' : '完成'),
+                      leadingIcon: _pageIndex < 2 ? CupertinoIcons.arrow_right : CupertinoIcons.checkmark,
                       onPressed: _isSaving ? null : (_pageIndex < 2 ? _nextPage : _finish),
                     ),
                   ),

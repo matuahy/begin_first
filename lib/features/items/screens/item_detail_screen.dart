@@ -7,6 +7,7 @@ import 'package:begin_first/features/items/providers/items_provider.dart';
 import 'package:begin_first/features/records/providers/record_provider.dart';
 import 'package:begin_first/features/records/widgets/record_timeline.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:begin_first/shared/widgets/photo_viewer.dart';
 import 'package:flutter/cupertino.dart';
@@ -43,71 +44,105 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
               ),
       ),
       child: SafeArea(
-        child: itemsAsync.when(
-          data: (_) {
-            if (item == null) {
-              return const EmptyState(message: '未找到物品');
-            }
-            return ListView(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              children: [
-                PhotoViewer(path: item.coverImagePath, height: 180),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  '${_categoryLabel(item.category)} · ${_importanceLabel(item.importance)}',
-                  style: const TextStyle(color: CupertinoColors.secondaryLabel),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppButton(
-                        label: '记录',
-                        onPressed: () => context.go('/items/${widget.itemId}/record'),
-                      ),
+        child: DecoratedBox(
+          decoration: AppDecorations.page,
+          child: itemsAsync.when(
+            data: (_) {
+              if (item == null) {
+                return const EmptyState(
+                  title: '未找到物品',
+                  message: '它可能已被删除，请返回列表确认。',
+                  icon: CupertinoIcons.exclamationmark_circle,
+                );
+              }
+              return ListView(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                children: [
+                  AppCard(
+                    isEmphasized: true,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PhotoViewer(path: item.coverImagePath, height: 176),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(item.name, style: AppTextStyles.heading),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          '${_categoryLabel(item.category)} · ${_importanceLabel(item.importance)}',
+                          style: AppTextStyles.bodyMuted,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppButton(
+                                label: '记录一次',
+                                leadingIcon: CupertinoIcons.camera,
+                                onPressed: () => context.go('/items/${widget.itemId}/record'),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: AppButton(
+                                label: '我找不到了',
+                                leadingIcon: CupertinoIcons.search,
+                                variant: AppButtonVariant.secondary,
+                                onPressed: () => context.go('/items/${widget.itemId}/retrieve'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: AppButton(
-                        label: '找回',
-                        onPressed: () => context.go('/items/${widget.itemId}/retrieve'),
-                      ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Text('记录轨迹', style: AppTextStyles.label),
+                  const SizedBox(height: AppSpacing.sm),
+                  _FilterControl(
+                    value: _filter,
+                    onChanged: (value) => setState(() => _filter = value),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  recordsAsync.when(
+                    data: (records) {
+                      final filtered = _applyFilter(records);
+                      if (filtered.isEmpty) {
+                        return const EmptyState(
+                          title: '暂无记录',
+                          message: '去拍一张当前摆放位置，后续就能快速找回。',
+                          icon: CupertinoIcons.clock,
+                          compact: true,
+                        );
+                      }
+                      return RecordTimeline(
+                        records: filtered,
+                        onRecordTap: (record) => context.go('/records/${record.id}'),
+                      );
+                    },
+                    loading: () => const Center(child: CupertinoActivityIndicator()),
+                    error: (error, stack) => EmptyState(
+                      title: '记录读取失败',
+                      message: '加载记录失败：$error',
+                      icon: CupertinoIcons.exclamationmark_triangle,
+                      compact: true,
                     ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                const Text('记录', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                const SizedBox(height: AppSpacing.sm),
-                _FilterControl(
-                  value: _filter,
-                  onChanged: (value) => setState(() => _filter = value),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                recordsAsync.when(
-                  data: (records) {
-                    final filtered = _applyFilter(records);
-                    if (filtered.isEmpty) {
-                      return const EmptyState(message: '暂无记录');
-                    }
-                    return RecordTimeline(
-                      records: filtered,
-                      onRecordTap: (record) => context.go('/records/${record.id}'),
-                    );
-                  },
-                  loading: () => const Center(child: CupertinoActivityIndicator()),
-                  error: (error, stack) => EmptyState(message: '加载记录失败：$error'),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                AppButton(
-                  label: '删除物品',
-                  isDestructive: true,
-                  onPressed: () => _confirmDelete(context, ref),
-                ),
-              ],
-            );
-          },
-          loading: () => const Center(child: CupertinoActivityIndicator()),
-          error: (error, stack) => EmptyState(message: '加载物品失败：$error'),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AppButton(
+                    label: '删除物品',
+                    isDestructive: true,
+                    onPressed: () => _confirmDelete(context, ref),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(child: CupertinoActivityIndicator()),
+            error: (error, stack) => EmptyState(
+              title: '加载失败',
+              message: '加载物品失败：$error',
+              icon: CupertinoIcons.exclamationmark_triangle,
+            ),
+          ),
         ),
       ),
     );

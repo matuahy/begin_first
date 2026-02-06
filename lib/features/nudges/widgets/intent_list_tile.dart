@@ -1,3 +1,4 @@
+import 'package:begin_first/app/theme.dart';
 import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -29,15 +30,14 @@ class IntentListTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isCompleted ? CupertinoColors.secondaryLabel : null,
+                  style: AppTextStyles.body.copyWith(
+                    color: isCompleted ? AppColors.textSecondary : AppColors.textPrimary,
                   ),
                 ),
                 if (subtitle != null)
-                  Text(
-                    subtitle!,
-                    style: const TextStyle(color: CupertinoColors.secondaryLabel),
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Text(subtitle!, style: AppTextStyles.bodyMuted),
                   ),
               ],
             ),

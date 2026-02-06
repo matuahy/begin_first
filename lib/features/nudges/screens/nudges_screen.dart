@@ -5,6 +5,7 @@ import 'package:begin_first/features/nudges/providers/intents_provider.dart';
 import 'package:begin_first/features/nudges/providers/nudge_provider.dart';
 import 'package:begin_first/features/nudges/widgets/intent_list_tile.dart';
 import 'package:begin_first/features/nudges/widgets/nudge_card.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:begin_first/services/notification_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,24 +32,46 @@ class NudgesScreen extends ConsumerWidget {
         ),
       ),
       child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('随机提醒', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => ref.invalidate(randomNudgeProvider),
-                  child: const Icon(CupertinoIcons.refresh),
+        child: DecoratedBox(
+          decoration: AppDecorations.page,
+          child: ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            children: [
+              AppCard(
+                isEmphasized: true,
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('今天顺手推进一点', style: AppTextStyles.heading),
+                          SizedBox(height: AppSpacing.xs),
+                          Text('不用计时，不追进度，做一点就算赢。', style: AppTextStyles.bodyMuted),
+                        ],
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      minSize: 0,
+                      onPressed: () => ref.invalidate(randomNudgeProvider),
+                      child: const Icon(CupertinoIcons.refresh),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const Text('随机提醒', style: AppTextStyles.label),
+              const SizedBox(height: AppSpacing.sm),
             randomNudgeAsync.when(
               data: (intent) {
                 if (intent == null) {
-                  return const EmptyState(message: '暂无可用意图');
+                    return const EmptyState(
+                      title: '暂无可用意图',
+                      message: '先新增一条意图，系统会随机给你轻提醒。',
+                      icon: CupertinoIcons.sparkles,
+                      compact: true,
+                    );
                 }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,15 +83,21 @@ class NudgesScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, stack) => EmptyState(message: '加载提醒失败：$error'),
+              error: (error, stack) => EmptyState(
+                title: '加载提醒失败',
+                message: '$error',
+                icon: CupertinoIcons.exclamationmark_triangle,
+                compact: true,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('已安排', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const Text('已安排', style: AppTextStyles.label),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
+                  minSize: 0,
                   onPressed: () async {
                     await ref.read(notificationServiceProvider).cancelAllNotifications();
                     ref.invalidate(pendingNudgesProvider);
@@ -81,7 +110,12 @@ class NudgesScreen extends ConsumerWidget {
             pendingAsync.when(
               data: (pending) {
                 if (pending.isEmpty) {
-                  return const EmptyState(message: '暂无已安排提醒');
+                  return const EmptyState(
+                    title: '暂无已安排提醒',
+                    message: '给随机提醒安排一个时间，稍后会准时出现。',
+                    icon: CupertinoIcons.bell,
+                    compact: true,
+                  );
                 }
                 return Column(
                   children: pending
@@ -92,10 +126,15 @@ class NudgesScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, stack) => EmptyState(message: '加载已安排提醒失败：$error'),
+              error: (error, stack) => EmptyState(
+                title: '读取失败',
+                message: '加载已安排提醒失败：$error',
+                icon: CupertinoIcons.exclamationmark_triangle,
+                compact: true,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            const Text('历史', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const Text('历史', style: AppTextStyles.label),
             const SizedBox(height: AppSpacing.sm),
             historyAsync.when(
               data: (ids) {
@@ -104,7 +143,12 @@ class NudgesScreen extends ConsumerWidget {
                 final historyIntents = ids.map((id) => intentMap[id]).whereType<Intent>().toList();
 
                 if (historyIntents.isEmpty) {
-                  return const EmptyState(message: '暂无历史');
+                  return const EmptyState(
+                    title: '暂无历史',
+                    message: '今天先顺手推进一条，历史会在这里沉淀。',
+                    icon: CupertinoIcons.clock,
+                    compact: true,
+                  );
                 }
 
                 return Column(
@@ -119,15 +163,25 @@ class NudgesScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, stack) => EmptyState(message: '加载历史失败：$error'),
+              error: (error, stack) => EmptyState(
+                title: '加载历史失败',
+                message: '$error',
+                icon: CupertinoIcons.exclamationmark_triangle,
+                compact: true,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            const Text('意图', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const Text('意图池', style: AppTextStyles.label),
             const SizedBox(height: AppSpacing.sm),
             intentsAsync.when(
               data: (intents) {
                 if (intents.isEmpty) {
-                  return const EmptyState(message: '暂无意图');
+                  return const EmptyState(
+                    title: '还没有意图',
+                    message: '写下一句你想推进的事，系统会在合适时机提醒你。',
+                    icon: CupertinoIcons.pencil,
+                    compact: true,
+                  );
                 }
                 final active = intents.where((intent) => !intent.isCompleted).toList();
                 final completed = intents.where((intent) => intent.isCompleted).toList();
@@ -136,13 +190,13 @@ class NudgesScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (active.isNotEmpty) ...[
-                      const Text('进行中', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const Text('进行中', style: AppTextStyles.body),
                       const SizedBox(height: AppSpacing.sm),
                       ...active.map((intent) => _IntentTile(intent: intent)),
                       const SizedBox(height: AppSpacing.lg),
                     ],
                     if (completed.isNotEmpty) ...[
-                      const Text('已完成', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const Text('已完成', style: AppTextStyles.body),
                       const SizedBox(height: AppSpacing.sm),
                       ...completed.map((intent) => _IntentTile(intent: intent)),
                     ],
@@ -150,9 +204,15 @@ class NudgesScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, stack) => EmptyState(message: '加载意图失败：$error'),
+              error: (error, stack) => EmptyState(
+                title: '加载失败',
+                message: '加载意图失败：$error',
+                icon: CupertinoIcons.exclamationmark_triangle,
+                compact: true,
+              ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -9,6 +9,7 @@ import 'package:begin_first/features/scenes/providers/scene_detail_provider.dart
 import 'package:begin_first/features/scenes/providers/scene_record_provider.dart';
 import 'package:begin_first/features/scenes/providers/scenes_provider.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,91 +39,133 @@ class SceneDetailScreen extends ConsumerWidget {
               ),
       ),
       child: SafeArea(
-        child: scenesAsync.when(
-          data: (_) {
-            if (scene == null) {
-              return const EmptyState(message: '未找到场景');
-            }
+        child: DecoratedBox(
+          decoration: AppDecorations.page,
+          child: scenesAsync.when(
+            data: (_) {
+              if (scene == null) {
+                return const EmptyState(
+                  title: '未找到场景',
+                  message: '该场景可能已被删除。',
+                  icon: CupertinoIcons.exclamationmark_circle,
+                );
+              }
 
-            final orderedIds = scene.defaultItemIds;
-            final items = itemsAsync.valueOrNull ?? const <Item>[];
-            final itemMap = <String, Item>{
-              for (final item in items) item.id: item,
-            };
-            final sceneItems = orderedIds
-                .map((id) => itemMap[id])
-                .whereType<Item>()
-                .toList();
+              final orderedIds = scene.defaultItemIds;
+              final items = itemsAsync.valueOrNull ?? const <Item>[];
+              final itemMap = <String, Item>{
+                for (final item in items) item.id: item,
+              };
+              final sceneItems = orderedIds
+                  .map((id) => itemMap[id])
+                  .whereType<Item>()
+                  .toList();
 
-            return ListView(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              children: [
-                Text(
-                  '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? '启用' : '停用'}',
-                  style: const TextStyle(color: CupertinoColors.secondaryLabel),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppButton(
-                        label: '编辑场景物品',
-                        onPressed: () => context.go('/scenes/$sceneId/edit'),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: AppButton(
-                        label: '开始记录',
-                        onPressed: sceneItems.isEmpty
-                            ? null
-                            : () => _startRecording(context, ref, sceneId, orderedIds, sceneItems),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                const Text('物品', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                const SizedBox(height: AppSpacing.sm),
-                if (itemsAsync.isLoading)
-                  const Center(child: CupertinoActivityIndicator())
-                else if (sceneItems.isEmpty)
-                  const EmptyState(message: '该场景暂无物品')
-                else
-                  ...sceneItems.map(
-                    (item) => ItemListTile(
-                      title: item.name,
-                      subtitle: '点击记录',
-                      onTap: () => context.go('/items/${item.id}/record?sceneId=$sceneId'),
+              return ListView(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                children: [
+                  AppCard(
+                    isEmphasized: true,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(scene.name, style: AppTextStyles.heading),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? '启用' : '停用'} · ${sceneItems.length} 个物品',
+                          style: AppTextStyles.bodyMuted,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppButton(
+                                label: '编辑场景',
+                                leadingIcon: CupertinoIcons.pencil,
+                                variant: AppButtonVariant.secondary,
+                                onPressed: () => context.go('/scenes/$sceneId/edit'),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: AppButton(
+                                label: '开始记录',
+                                leadingIcon: CupertinoIcons.camera,
+                                onPressed: sceneItems.isEmpty
+                                    ? null
+                                    : () => _startRecording(context, ref, sceneId, orderedIds, sceneItems),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                const SizedBox(height: AppSpacing.lg),
-                const Text('场景记录', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                const SizedBox(height: AppSpacing.sm),
-                sceneRecordsAsync.when(
-                  data: (records) {
-                    if (records.isEmpty) {
-                      return const EmptyState(message: '暂无记录');
-                    }
-                    return RecordTimeline(
-                      records: records,
-                      onRecordTap: (record) => context.go('/records/${record.id}'),
-                    );
-                  },
-                  loading: () => const Center(child: CupertinoActivityIndicator()),
-                  error: (error, stack) => EmptyState(message: '加载记录失败：$error'),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                AppButton(
-                  label: '删除场景',
-                  isDestructive: true,
-                  onPressed: () => _confirmDelete(context, ref),
-                ),
-              ],
-            );
-          },
-          loading: () => const Center(child: CupertinoActivityIndicator()),
-          error: (error, stack) => EmptyState(message: '加载场景失败：$error'),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Text('场景物品', style: AppTextStyles.label),
+                  const SizedBox(height: AppSpacing.sm),
+                  if (itemsAsync.isLoading)
+                    const Center(child: CupertinoActivityIndicator())
+                  else if (sceneItems.isEmpty)
+                    const EmptyState(
+                      title: '还没配置物品',
+                      message: '给这个场景添加默认物品后，可一键连续记录。',
+                      icon: CupertinoIcons.cube_box,
+                      compact: true,
+                    )
+                  else
+                    ...sceneItems.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: ItemListTile(
+                          title: item.name,
+                          subtitle: '点击记录当前位置',
+                          onTap: () => context.go('/items/${item.id}/record?sceneId=$sceneId'),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Text('场景记录', style: AppTextStyles.label),
+                  const SizedBox(height: AppSpacing.sm),
+                  sceneRecordsAsync.when(
+                    data: (records) {
+                      if (records.isEmpty) {
+                        return const EmptyState(
+                          title: '暂无记录',
+                          message: '试试“开始记录”，连续拍几张更高效。',
+                          icon: CupertinoIcons.clock,
+                          compact: true,
+                        );
+                      }
+                      return RecordTimeline(
+                        records: records,
+                        onRecordTap: (record) => context.go('/records/${record.id}'),
+                      );
+                    },
+                    loading: () => const Center(child: CupertinoActivityIndicator()),
+                    error: (error, stack) => EmptyState(
+                      title: '读取失败',
+                      message: '加载记录失败：$error',
+                      icon: CupertinoIcons.exclamationmark_triangle,
+                      compact: true,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AppButton(
+                    label: '删除场景',
+                    isDestructive: true,
+                    onPressed: () => _confirmDelete(context, ref),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(child: CupertinoActivityIndicator()),
+            error: (error, stack) => EmptyState(
+              title: '加载失败',
+              message: '加载场景失败：$error',
+              icon: CupertinoIcons.exclamationmark_triangle,
+            ),
+          ),
         ),
       ),
     );

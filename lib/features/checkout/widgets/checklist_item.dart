@@ -1,3 +1,5 @@
+import 'package:begin_first/app/theme.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:flutter/cupertino.dart';
 
 class ChecklistItem extends StatelessWidget {
@@ -14,12 +16,28 @@ class ChecklistItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title),
-        CupertinoSwitch(value: isChecked, onChanged: onChanged),
-      ],
+    return AppCard(
+      onTap: () => onChanged(!isChecked),
+      child: Row(
+        children: [
+          Icon(
+            isChecked ? CupertinoIcons.checkmark_seal_fill : CupertinoIcons.circle,
+            size: 22,
+            color: isChecked ? AppColors.success : AppColors.textTertiary,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              title,
+              style: AppTextStyles.body.copyWith(
+                color: isChecked ? AppColors.textSecondary : AppColors.textPrimary,
+                decoration: isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+              ),
+            ),
+          ),
+          CupertinoSwitch(value: isChecked, onChanged: onChanged),
+        ],
+      ),
     );
   }
 }

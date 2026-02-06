@@ -1,3 +1,5 @@
+import 'package:begin_first/app/theme.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:flutter/cupertino.dart';
 
 class ItemListTile extends StatelessWidget {
@@ -14,18 +16,31 @@ class ItemListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      onPressed: onTap,
-      alignment: Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return AppCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 13),
+      child: Row(
         children: [
-          Text(title),
-          if (subtitle != null)
-            Text(
-              subtitle!,
-              style: const TextStyle(color: CupertinoColors.secondaryLabel),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTextStyles.body),
+                if (subtitle != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    subtitle!,
+                    style: AppTextStyles.bodyMuted,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (onTap != null)
+            const Icon(
+              CupertinoIcons.chevron_right,
+              size: 16,
+              color: AppColors.textTertiary,
             ),
         ],
       ),

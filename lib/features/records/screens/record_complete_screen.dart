@@ -5,6 +5,7 @@ import 'package:begin_first/features/records/models/record_draft.dart';
 import 'package:begin_first/features/records/providers/record_provider.dart';
 import 'package:begin_first/features/scenes/providers/scene_record_provider.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:begin_first/shared/widgets/photo_viewer.dart';
 import 'package:flutter/cupertino.dart';
@@ -45,17 +46,26 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
           middle: Text('补全记录'),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              const Expanded(child: EmptyState(message: '没有可用草稿')),
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: AppButton(
-                  label: '返回',
-                  onPressed: () => context.go('/items/${widget.itemId}'),
+          child: DecoratedBox(
+            decoration: AppDecorations.page,
+            child: Column(
+              children: [
+                const Expanded(
+                  child: EmptyState(
+                    title: '没有可用草稿',
+                    message: '请先拍照，再回来补充备注。',
+                    icon: CupertinoIcons.photo,
+                  ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: AppButton(
+                    label: '返回物品详情',
+                    onPressed: () => context.go('/items/${widget.itemId}'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -66,56 +76,74 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
         middle: Text('补全记录'),
       ),
       child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          children: [
-            PhotoViewer(path: draft.tempPhotoPath, height: 200),
-            const SizedBox(height: AppSpacing.md),
-            CupertinoFormSection.insetGrouped(
-              header: const Text('详情'),
-              children: [
-                CupertinoTextFormFieldRow(
-                  controller: _noteController,
-                  placeholder: '备注',
+        child: DecoratedBox(
+          decoration: AppDecorations.page,
+          child: ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            children: [
+              AppCard(
+                isEmphasized: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('补充线索（可选）', style: AppTextStyles.heading),
+                    const SizedBox(height: AppSpacing.sm),
+                    PhotoViewer(path: draft.tempPhotoPath, height: 200),
+                  ],
                 ),
-                CupertinoTextFormFieldRow(
-                  controller: _tagsController,
-                  placeholder: '标签（逗号分隔）',
-                ),
-              ],
-            ),
-            CupertinoFormSection.insetGrouped(
-              header: const Text('位置'),
-              children: [
-                CupertinoFormRow(
-                  prefix: const Text('附加位置'),
-                  child: CupertinoSwitch(
-                    value: _attachLocation,
-                    onChanged: _isLocating ? null : _toggleLocation,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              CupertinoFormSection.insetGrouped(
+                backgroundColor: const Color(0x00000000),
+                header: const Text('详情'),
+                children: [
+                  CupertinoTextFormFieldRow(
+                    controller: _noteController,
+                    placeholder: '备注',
                   ),
-                ),
-                if (_attachLocation)
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: AppSpacing.md,
-                      right: AppSpacing.md,
-                      bottom: AppSpacing.md,
+                  CupertinoTextFormFieldRow(
+                    controller: _tagsController,
+                    placeholder: '标签（逗号分隔）',
+                  ),
+                ],
+              ),
+              CupertinoFormSection.insetGrouped(
+                backgroundColor: const Color(0x00000000),
+                header: const Text('位置'),
+                children: [
+                  CupertinoFormRow(
+                    prefix: const Text('附加位置'),
+                    child: CupertinoSwitch(
+                      value: _attachLocation,
+                      activeTrackColor: AppColors.primary,
+                      onChanged: _isLocating ? null : _toggleLocation,
                     ),
-                    child: _isLocating
-                        ? const CupertinoActivityIndicator()
-                        : Text(
-                            _location == null
-                                ? '无法获取位置'
-                                : _location!.address ?? '${_location!.latitude}, ${_location!.longitude}',
-                          ),
                   ),
-              ],
-            ),
-            AppButton(
-              label: _isSaving ? '保存中...' : '保存记录',
-              onPressed: _isSaving ? null : () => _saveRecord(draft),
-            ),
-          ],
+                  if (_attachLocation)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.md,
+                        right: AppSpacing.md,
+                        bottom: AppSpacing.md,
+                      ),
+                      child: _isLocating
+                          ? const CupertinoActivityIndicator()
+                          : Text(
+                              _location == null
+                                  ? '无法获取位置'
+                                  : _location!.address ?? '${_location!.latitude}, ${_location!.longitude}',
+                              style: AppTextStyles.bodyMuted,
+                            ),
+                    ),
+                ],
+              ),
+              AppButton(
+                label: _isSaving ? '保存中...' : '保存记录',
+                leadingIcon: CupertinoIcons.checkmark,
+                onPressed: _isSaving ? null : () => _saveRecord(draft),
+              ),
+            ],
+          ),
         ),
       ),
     );

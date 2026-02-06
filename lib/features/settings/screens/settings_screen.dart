@@ -18,66 +18,91 @@ class SettingsScreen extends ConsumerWidget {
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('设置'),
+        middle: Text('我的'),
       ),
       child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          children: [
-            const Text('统计', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Expanded(child: StatsCard(title: '物品', value: '${stats.itemCount}')),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: StatsCard(title: '记录', value: '${stats.recordCount}')),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: StatsCard(title: '进行中', value: '${stats.activeIntentCount}')),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              stats.latestRecordAt == null
-                  ? '最近记录：-'
-                  : '最近记录：${stats.latestRecordAt!.fullDateTime}',
-              style: const TextStyle(color: CupertinoColors.secondaryLabel),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            CupertinoFormSection.insetGrouped(
-              header: const Text('权限'),
-              children: [
-                CupertinoFormRow(
-                  prefix: const Text('通知'),
-                  child: CupertinoSwitch(
-                    value: settings.notificationsEnabled,
-                    onChanged: (value) => _toggleNotifications(context, ref, value),
-                  ),
+        child: DecoratedBox(
+          decoration: AppDecorations.page,
+          child: ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: AppDecorations.card(emphasized: true),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('你的记录习惯', style: AppTextStyles.heading),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      stats.latestRecordAt == null
+                          ? '最近记录：还没有记录'
+                          : '最近记录：${stats.latestRecordAt!.fullDateTime}',
+                      style: AppTextStyles.bodyMuted,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        Expanded(child: StatsCard(title: '物品', value: '${stats.itemCount}')),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(child: StatsCard(title: '记录', value: '${stats.recordCount}')),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(child: StatsCard(title: '进行中', value: '${stats.activeIntentCount}')),
+                      ],
+                    ),
+                  ],
                 ),
-                CupertinoFormRow(
-                  prefix: const Text('定位'),
-                  child: CupertinoSwitch(
-                    value: settings.locationEnabled,
-                    onChanged: (value) => _toggleLocation(context, ref, value),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const Padding(
+                padding: EdgeInsets.only(left: AppSpacing.sm),
+                child: Text('权限与提醒', style: AppTextStyles.label),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              CupertinoFormSection.insetGrouped(
+                backgroundColor: const Color(0x00000000),
+                children: [
+                  CupertinoFormRow(
+                    prefix: const Text('通知'),
+                    child: CupertinoSwitch(
+                      value: settings.notificationsEnabled,
+                      activeTrackColor: AppColors.primary,
+                      onChanged: (value) => _toggleNotifications(context, ref, value),
+                    ),
                   ),
-                ),
-                CupertinoFormRow(
-                  prefix: const Text('系统设置'),
-                  child: CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => ref.read(permissionServiceProvider).openAppSettings(),
-                    child: const Text('打开'),
+                  CupertinoFormRow(
+                    prefix: const Text('定位'),
+                    child: CupertinoSwitch(
+                      value: settings.locationEnabled,
+                      activeTrackColor: AppColors.primary,
+                      onChanged: (value) => _toggleLocation(context, ref, value),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            const Text('维护', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: AppSpacing.sm),
-            AppButton(
-              label: '清理未使用图片',
-              onPressed: () => _cleanImages(context, ref),
-            ),
-          ],
+                  CupertinoFormRow(
+                    prefix: const Text('系统设置'),
+                    child: CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      minSize: 0,
+                      onPressed: () => ref.read(permissionServiceProvider).openAppSettings(),
+                      child: const Text('打开'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              const Padding(
+                padding: EdgeInsets.only(left: AppSpacing.sm),
+                child: Text('维护', style: AppTextStyles.label),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppButton(
+                label: '清理未使用图片',
+                leadingIcon: CupertinoIcons.trash,
+                variant: AppButtonVariant.secondary,
+                onPressed: () => _cleanImages(context, ref),
+              ),
+            ],
+          ),
         ),
       ),
     );

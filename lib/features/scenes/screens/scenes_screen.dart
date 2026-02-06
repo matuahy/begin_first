@@ -3,6 +3,7 @@ import 'package:begin_first/domain/models/enums/scene_type.dart';
 import 'package:begin_first/features/scenes/providers/scenes_provider.dart';
 import 'package:begin_first/features/scenes/widgets/scene_card.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,39 +26,70 @@ class ScenesScreen extends ConsumerWidget {
         ),
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: scenesAsync.when(
-            data: (scenes) {
-              return Column(
-                children: [
-                  AppButton(
-                    label: '出门检查',
-                    onPressed: () => context.go('/checkout'),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Expanded(
-                    child: scenes.isEmpty
-                        ? const EmptyState(message: '暂无场景')
-                        : ListView.separated(
-                            itemCount: scenes.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
-                            itemBuilder: (context, index) {
-                              final scene = scenes[index];
-                              final subtitle = '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? '启用' : '停用'}';
-                              return SceneCard(
-                                title: scene.name,
-                                subtitle: subtitle,
-                                onTap: () => context.go('/scenes/${scene.id}'),
-                              );
-                            },
+        child: DecoratedBox(
+          decoration: AppDecorations.page,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: scenesAsync.when(
+              data: (scenes) {
+                final activeCount = scenes.where((scene) => scene.isActive).length;
+                return Column(
+                  children: [
+                    AppCard(
+                      isEmphasized: true,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('场景让记录更快', style: AppTextStyles.heading),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            '当前启用 $activeCount 个场景，回家/出门都可以一键检查。',
+                            style: AppTextStyles.bodyMuted,
                           ),
-                  ),
-                ],
-              );
-            },
-            loading: () => const Center(child: CupertinoActivityIndicator()),
-            error: (error, stack) => EmptyState(message: '加载场景失败：$error'),
+                          const SizedBox(height: AppSpacing.md),
+                          AppButton(
+                            label: '开始出门检查',
+                            leadingIcon: CupertinoIcons.check_mark_circled,
+                            onPressed: () => context.go('/checkout'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Expanded(
+                      child: scenes.isEmpty
+                          ? EmptyState(
+                              title: '还没有场景',
+                              message: '创建“回家”“公司”“下车”等场景后，可连续记录。',
+                              icon: CupertinoIcons.square_grid_2x2,
+                              actionLabel: '新建场景',
+                              onAction: () => context.go('/scenes/new'),
+                            )
+                          : ListView.separated(
+                              itemCount: scenes.length,
+                              separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                              itemBuilder: (context, index) {
+                                final scene = scenes[index];
+                                final subtitle =
+                                    '${_sceneTypeLabel(scene.type)} · ${scene.defaultItemIds.length} 个默认物品 · ${scene.isActive ? '启用' : '停用'}';
+                                return SceneCard(
+                                  title: scene.name,
+                                  subtitle: subtitle,
+                                  onTap: () => context.go('/scenes/${scene.id}'),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                );
+              },
+              loading: () => const Center(child: CupertinoActivityIndicator()),
+              error: (error, stack) => EmptyState(
+                title: '加载失败',
+                message: '场景数据读取失败：$error',
+                icon: CupertinoIcons.exclamationmark_triangle,
+              ),
+            ),
           ),
         ),
       ),

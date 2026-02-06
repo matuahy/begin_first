@@ -20,16 +20,24 @@ class PhotoViewer extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           color: AppColors.secondaryBackground,
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.border),
         ),
         child: const Center(
-          child: Icon(CupertinoIcons.photo, size: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(CupertinoIcons.photo, size: 32, color: AppColors.textSecondary),
+              SizedBox(height: AppSpacing.sm),
+              Text('暂无照片', style: AppTextStyles.bodyMuted),
+            ],
+          ),
         ),
       );
     }
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.md),
+      borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Image.file(
         File(path!),
         height: height,
