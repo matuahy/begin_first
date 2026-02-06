@@ -20,8 +20,10 @@ ios/Flutter/Generated.xcconfig
 ios/Flutter/ephemeral/
 ios/Pods/
 ios/.symlinks/
+ios/Podfile.lock
 
 macos/Flutter/ephemeral/
+macos/Podfile.lock
 linux/flutter/ephemeral/
 windows/flutter/ephemeral/
 
