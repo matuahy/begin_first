@@ -72,9 +72,16 @@ class SceneDetailScreen extends ConsumerWidget {
                         Text(scene.name, style: AppTextStyles.heading),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? '启用' : '停用'} · ${sceneItems.length} 个物品',
+                          '${_sceneTypeLabel(scene.type)} · ${scene.isActive ? '启用' : '停用'} · ${sceneItems.length} 个物品${scene.geofenceEnabled ? ' · 围栏 ${scene.geofenceRadiusMeters} 米' : ' · 未设围栏'}',
                           style: AppTextStyles.bodyMuted,
                         ),
+                        if (scene.geofenceEnabled && scene.geofenceLatitude != null && scene.geofenceLongitude != null) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            '围栏中心：${scene.geofenceLatitude!.toStringAsFixed(5)}, ${scene.geofenceLongitude!.toStringAsFixed(5)}',
+                            style: AppTextStyles.caption,
+                          ),
+                        ],
                         const SizedBox(height: AppSpacing.md),
                         Row(
                           children: [
@@ -132,7 +139,7 @@ class SceneDetailScreen extends ConsumerWidget {
                       if (records.isEmpty) {
                         return const EmptyState(
                           title: '暂无记录',
-                          message: '试试"开始记录"，连续拍几张更高效。',
+                          message: '试试开始记录，连续拍几张更高效。',
                           icon: CupertinoIcons.clock,
                           compact: true,
                         );

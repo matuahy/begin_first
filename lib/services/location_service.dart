@@ -16,20 +16,19 @@ abstract class LocationService {
 class LocationServiceImpl implements LocationService {
   @override
   Future<LocationInfo?> getCurrentLocation() async {
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
+    final permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
       return null;
     }
-
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.medium,
-    );
-
-    return _buildLocationInfo(position.latitude, position.longitude);
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+      );
+      return _buildLocationInfo(position.latitude, position.longitude);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override

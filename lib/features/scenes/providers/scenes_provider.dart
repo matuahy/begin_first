@@ -38,6 +38,10 @@ class SceneActions {
     required String iconName,
     List<String> defaultItemIds = const [],
     bool isActive = true,
+    bool geofenceEnabled = false,
+    double? geofenceLatitude,
+    double? geofenceLongitude,
+    int geofenceRadiusMeters = 180,
   }) async {
     final scenes = await _repository.getAllScenes();
     final maxSort = scenes.isEmpty ? -1 : scenes.map((scene) => scene.sortOrder).reduce(max);
@@ -48,6 +52,10 @@ class SceneActions {
       iconName: iconName,
       defaultItemIds: defaultItemIds,
       isActive: isActive,
+      geofenceEnabled: geofenceEnabled,
+      geofenceLatitude: geofenceLatitude,
+      geofenceLongitude: geofenceLongitude,
+      geofenceRadiusMeters: geofenceRadiusMeters,
       sortOrder: maxSort + 1,
     );
     await _repository.createScene(scene);

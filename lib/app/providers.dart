@@ -12,6 +12,7 @@ import 'package:begin_first/services/image_storage_service.dart';
 import 'package:begin_first/services/location_service.dart';
 import 'package:begin_first/services/notification_service.dart';
 import 'package:begin_first/services/permission_service.dart';
+import 'package:begin_first/services/system_geofence_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final hiveBoxesProvider = Provider<HiveBoxes>((ref) => HiveBoxes());
@@ -50,4 +51,8 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 
 final permissionServiceProvider = Provider<PermissionService>((ref) {
   return PermissionServiceImpl();
+});
+
+final systemGeofenceServiceProvider = Provider<SystemGeofenceService>((ref) {
+  return SystemGeofenceService();
 });

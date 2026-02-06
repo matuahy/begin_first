@@ -73,7 +73,7 @@ class NudgeActions {
     required DateTime scheduledTime,
   }) async {
     await notificationService.initialize();
-    final permission = await notificationService.requestNotificationPermission();
+    final permission = await notificationService.hasNotificationPermission();
     if (!permission) {
       return false;
     }

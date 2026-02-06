@@ -138,6 +138,13 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
                 ],
               ),
               AppButton(
+                label: _isSaving ? '保存中...' : '跳过补充，直接保存',
+                leadingIcon: CupertinoIcons.forward,
+                variant: AppButtonVariant.ghost,
+                onPressed: _isSaving ? null : () => _saveRecord(draft, skipExtras: true),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppButton(
                 label: _isSaving ? '保存中...' : '保存记录',
                 leadingIcon: CupertinoIcons.checkmark,
                 onPressed: _isSaving ? null : () => _saveRecord(draft),
@@ -169,19 +176,21 @@ class _RecordCompleteScreenState extends ConsumerState<RecordCompleteScreen> {
     }
   }
 
-  Future<void> _saveRecord(RecordDraft draft) async {
+  Future<void> _saveRecord(RecordDraft draft, {bool skipExtras = false}) async {
     setState(() => _isSaving = true);
-    final tags = _tagsController.text
-        .split(',')
-        .map((tag) => tag.trim())
-        .where((tag) => tag.isNotEmpty)
-        .toList();
+    final tags = skipExtras
+        ? <String>[]
+        : _tagsController.text
+            .split(',')
+            .map((tag) => tag.trim())
+            .where((tag) => tag.isNotEmpty)
+            .toList();
 
     await ref.read(recordActionsProvider).saveRecord(
           draft: draft,
-          note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+          note: skipExtras || _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
           tags: tags,
-          location: _attachLocation ? _location : null,
+          location: skipExtras ? null : (_attachLocation ? _location : null),
         );
 
     ref.read(recordDraftProvider.notifier).state = null;

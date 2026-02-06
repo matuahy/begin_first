@@ -53,5 +53,14 @@
 	<string>Allow access to photo library to save item photos.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Allow location access to tag item records.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Allow background location to automatically trigger checkout when leaving a saved scene.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Allow background location to automatically trigger checkout when leaving a saved scene.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+	</array>
 </dict>
 </plist>

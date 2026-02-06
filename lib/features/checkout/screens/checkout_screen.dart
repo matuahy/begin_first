@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:begin_first/app/theme.dart';
 import 'package:begin_first/features/checkout/providers/checkout_provider.dart';
 import 'package:begin_first/features/checkout/widgets/checklist_item.dart';
@@ -8,6 +10,7 @@ import 'package:begin_first/shared/widgets/app_button.dart';
 import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -18,6 +21,16 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 }
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
+  String? _inlineNotice;
+  bool _noticeIsWarning = false;
+  Timer? _noticeTimer;
+
+  @override
+  void dispose() {
+    _noticeTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final scenesAsync = ref.watch(scenesStreamProvider);
@@ -108,6 +121,31 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ],
                   ),
                 ),
+                if (_inlineNotice != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  AppCard(
+                    color: _noticeIsWarning ? const Color(0xFFFFF4E1) : AppColors.primarySoft,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _noticeIsWarning ? CupertinoIcons.exclamationmark_circle : CupertinoIcons.check_mark_circled,
+                          size: 18,
+                          color: _noticeIsWarning ? AppColors.warning : AppColors.success,
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(_inlineNotice!, style: AppTextStyles.bodyMuted),
+                        ),
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          minSize: 0,
+                          onPressed: _clearNotice,
+                          child: const Icon(CupertinoIcons.xmark_circle, size: 18, color: AppColors.textTertiary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.md),
                 Expanded(
                   child: items.isEmpty
@@ -187,6 +225,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   void _toggleItem(String itemId, bool value) {
+    if (_inlineNotice != null) {
+      _clearNotice();
+    }
     final current = ref.read(checkoutCheckedProvider);
     final next = {...current};
     if (value) {
@@ -202,24 +243,26 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _finishCheckout(int missingCount) async {
-    final title = missingCount == 0 ? '准备好了' : '还有遗漏';
-    final message = missingCount == 0
-        ? '本次出门检查已完成，祝你一路顺利。'
-        : '还有 $missingCount 项未确认。你可以返回继续检查，也可以直接结束。';
+    if (missingCount == 0) {
+      _resetChecked();
+      _showNotice('已完成出门检查，下次出门前再来快速确认一次。');
+      return;
+    }
 
     final shouldFinish = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(message),
+        title: const Text('还有遗漏'),
+        content: Text('仍有 $missingCount 项未确认，是否直接结束本次检查？'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('继续检查'),
           ),
           CupertinoDialogAction(
+            isDestructiveAction: true,
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('完成'),
+            child: const Text('仍然结束'),
           ),
         ],
       ),
@@ -227,21 +270,36 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     if (shouldFinish == true) {
       _resetChecked();
-      if (mounted) {
-        await showCupertinoDialog<void>(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('已完成'),
-            content: const Text('下次出门前再来快速确认一次。'),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('知道了'),
-              ),
-            ],
-          ),
-        );
-      }
+      _showNotice('本次检查已结束，仍有 $missingCount 项未确认。', warning: true);
     }
+  }
+
+  void _showNotice(String message, {bool warning = false}) {
+    _noticeTimer?.cancel();
+    if (warning) {
+      HapticFeedback.heavyImpact();
+    } else {
+      HapticFeedback.lightImpact();
+    }
+    setState(() {
+      _inlineNotice = message;
+      _noticeIsWarning = warning;
+    });
+    _noticeTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        _clearNotice();
+      }
+    });
+  }
+
+  void _clearNotice() {
+    _noticeTimer?.cancel();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _inlineNotice = null;
+      _noticeIsWarning = false;
+    });
   }
 }

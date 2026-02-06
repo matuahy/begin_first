@@ -1,4 +1,5 @@
 import 'package:begin_first/app/theme.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:flutter/cupertino.dart';
 
 /// iOS风格的操作卡片按钮
@@ -30,47 +31,36 @@ class ActionButtonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return AppCard(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground.resolveFrom(context),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          boxShadow: AppShadows.subtle,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: (iconColor ?? AppColors.primary).withOpacity(0.12),
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-              child: Icon(
-                icon,
-                color: iconColor ?? AppColors.primary,
-                size: 22,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: (iconColor ?? AppColors.primary).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            const SizedBox(height: AppSpacing.md),
+            child: Icon(
+              icon,
+              color: iconColor ?? AppColors.primary,
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(title, style: AppTextStyles.body),
+          if (subtitle != null) ...[
+            const SizedBox(height: AppSpacing.xs),
             Text(
-              title,
-              style: AppTextStyles.headline,
+              subtitle!,
+              style: AppTextStyles.bodyMuted,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            if (subtitle != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                subtitle!,
-                style: AppTextStyles.caption1,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }
@@ -89,18 +79,18 @@ class ActionButtonCardRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: children.map((card) {
-        final index = children.indexOf(card);
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: index == 0 ? 0 : AppSpacing.sm / 2,
-              right: index == children.length - 1 ? 0 : AppSpacing.sm / 2,
+      children: [
+        for (var index = 0; index < children.length; index++)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: index == 0 ? 0 : AppSpacing.sm / 2,
+                right: index == children.length - 1 ? 0 : AppSpacing.sm / 2,
+              ),
+              child: children[index],
             ),
-            child: card,
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 }

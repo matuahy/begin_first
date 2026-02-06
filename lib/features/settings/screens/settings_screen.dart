@@ -1,10 +1,12 @@
 import 'package:begin_first/app/providers.dart';
 import 'package:begin_first/app/theme.dart';
 import 'package:begin_first/core/extensions/datetime_ext.dart';
+import 'package:begin_first/features/checkout/providers/checkout_provider.dart';
 import 'package:begin_first/features/records/providers/record_provider.dart';
 import 'package:begin_first/features/settings/providers/settings_provider.dart';
 import 'package:begin_first/features/settings/widgets/stats_card.dart';
 import 'package:begin_first/shared/widgets/app_button.dart';
+import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,8 +15,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(appSettingsProvider);
     final stats = ref.watch(appStatsProvider);
+    final settings = ref.watch(appSettingsProvider);
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
@@ -59,35 +61,41 @@ class SettingsScreen extends ConsumerWidget {
                 child: Text('权限与提醒', style: AppTextStyles.label),
               ),
               const SizedBox(height: AppSpacing.sm),
-              CupertinoFormSection.insetGrouped(
-                backgroundColor: const Color(0x00000000),
-                children: [
-                  CupertinoFormRow(
-                    prefix: const Text('通知'),
-                    child: CupertinoSwitch(
-                      value: settings.notificationsEnabled,
-                      activeTrackColor: AppColors.primary,
-                      onChanged: (value) => _toggleNotifications(context, ref, value),
-                    ),
-                  ),
-                  CupertinoFormRow(
-                    prefix: const Text('定位'),
-                    child: CupertinoSwitch(
-                      value: settings.locationEnabled,
-                      activeTrackColor: AppColors.primary,
-                      onChanged: (value) => _toggleLocation(context, ref, value),
-                    ),
-                  ),
-                  CupertinoFormRow(
-                    prefix: const Text('系统设置'),
-                    child: CupertinoButton(
+              AppCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CupertinoFormRow(
                       padding: EdgeInsets.zero,
-                      minSize: 0,
-                      onPressed: () => ref.read(permissionServiceProvider).openAppSettings(),
-                      child: const Text('打开'),
+                      prefix: const Text('自动出门检查'),
+                      child: CupertinoSwitch(
+                        value: settings.autoCheckoutEnabled,
+                        onChanged: (value) => _toggleAutoCheckout(ref, value),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.xs),
+                    const Text('权限仅在首次启动请求一次', style: AppTextStyles.body),
+                    const SizedBox(height: AppSpacing.xs),
+                    const Text(
+                      '地理围栏依赖“始终允许定位”。如需修改通知、定位或相机权限，请前往系统设置。',
+                      style: AppTextStyles.bodyMuted,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    AppButton(
+                      label: '查看隐私说明',
+                      leadingIcon: CupertinoIcons.shield,
+                      variant: AppButtonVariant.ghost,
+                      onPressed: () => _showPrivacyNote(context),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppButton(
+                      label: '打开系统设置',
+                      leadingIcon: CupertinoIcons.settings,
+                      variant: AppButtonVariant.ghost,
+                      onPressed: () => ref.read(permissionServiceProvider).openAppSettings(),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               const Padding(
@@ -108,28 +116,27 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _toggleNotifications(BuildContext context, WidgetRef ref, bool value) async {
-    if (value) {
-      final granted = await ref.read(notificationServiceProvider).requestNotificationPermission();
-      if (!granted) {
-        await _showMessage(context, '需要权限', '请在系统设置中开启通知权限。');
-        return;
-      }
-    } else {
-      await ref.read(notificationServiceProvider).cancelAllNotifications();
-    }
-    await ref.read(appSettingsProvider.notifier).setNotificationsEnabled(value);
+  Future<void> _toggleAutoCheckout(WidgetRef ref, bool value) async {
+    await ref.read(appSettingsProvider.notifier).setAutoCheckoutEnabled(value);
+    ref.invalidate(checkoutGeofenceTriggerProvider);
   }
 
-  Future<void> _toggleLocation(BuildContext context, WidgetRef ref, bool value) async {
-    if (value) {
-      final granted = await ref.read(permissionServiceProvider).ensureLocationPermission();
-      if (!granted) {
-        await _showMessage(context, '需要权限', '请在系统设置中开启定位权限。');
-        return;
-      }
-    }
-    await ref.read(appSettingsProvider.notifier).setLocationEnabled(value);
+  Future<void> _showPrivacyNote(BuildContext context) async {
+    await showCupertinoDialog<void>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('隐私说明'),
+        content: const Text(
+          '地理围栏仅用于自动触发出门检查，位置信息保存在本地设备，不会上传到远端。你可随时关闭自动出门检查或在系统设置中关闭定位权限。',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('知道了'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _cleanImages(BuildContext context, WidgetRef ref) async {

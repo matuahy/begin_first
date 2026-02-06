@@ -8,6 +8,10 @@ class Scene {
     required this.iconName,
     this.defaultItemIds = const [],
     this.isActive = true,
+    this.geofenceEnabled = false,
+    this.geofenceLatitude,
+    this.geofenceLongitude,
+    this.geofenceRadiusMeters = 180,
     required this.sortOrder,
   });
 
@@ -17,6 +21,10 @@ class Scene {
   final String iconName;
   final List<String> defaultItemIds;
   final bool isActive;
+  final bool geofenceEnabled;
+  final double? geofenceLatitude;
+  final double? geofenceLongitude;
+  final int geofenceRadiusMeters;
   final int sortOrder;
 
   Scene copyWith({
@@ -26,6 +34,10 @@ class Scene {
     String? iconName,
     List<String>? defaultItemIds,
     bool? isActive,
+    bool? geofenceEnabled,
+    double? geofenceLatitude,
+    double? geofenceLongitude,
+    int? geofenceRadiusMeters,
     int? sortOrder,
   }) {
     return Scene(
@@ -35,6 +47,10 @@ class Scene {
       iconName: iconName ?? this.iconName,
       defaultItemIds: defaultItemIds ?? this.defaultItemIds,
       isActive: isActive ?? this.isActive,
+      geofenceEnabled: geofenceEnabled ?? this.geofenceEnabled,
+      geofenceLatitude: geofenceLatitude ?? this.geofenceLatitude,
+      geofenceLongitude: geofenceLongitude ?? this.geofenceLongitude,
+      geofenceRadiusMeters: geofenceRadiusMeters ?? this.geofenceRadiusMeters,
       sortOrder: sortOrder ?? this.sortOrder,
     );
   }

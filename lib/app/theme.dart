@@ -100,24 +100,27 @@ class AppTextStyles {
   static const TextStyle headline = TextStyle(
     fontSize: 17,
     fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
   );
   static const TextStyle callout = TextStyle(
     fontSize: 16,
+    color: AppColors.textPrimary,
   );
   static const TextStyle subhead = TextStyle(
     fontSize: 15,
+    color: AppColors.textSecondary,
   );
   static const TextStyle footnote = TextStyle(
     fontSize: 13,
-    color: CupertinoColors.secondaryLabel,
+    color: AppColors.textSecondary,
   );
   static const TextStyle caption1 = TextStyle(
     fontSize: 12,
-    color: CupertinoColors.secondaryLabel,
+    color: AppColors.textSecondary,
   );
   static const TextStyle caption2 = TextStyle(
     fontSize: 11,
-    color: CupertinoColors.tertiaryLabel,
+    color: AppColors.textTertiary,
   );
 }
 
@@ -158,7 +161,7 @@ class AppDecorations {
 class AppShadows {
   static List<BoxShadow> get card => [
         BoxShadow(
-          color: CupertinoColors.systemGrey.withOpacity(0.1),
+          color: AppColors.textPrimary.withOpacity(0.08),
           blurRadius: 10,
           offset: const Offset(0, 4),
         ),
@@ -166,7 +169,7 @@ class AppShadows {
 
   static List<BoxShadow> get elevated => [
         BoxShadow(
-          color: CupertinoColors.systemGrey.withOpacity(0.15),
+          color: AppColors.textPrimary.withOpacity(0.14),
           blurRadius: 20,
           offset: const Offset(0, 8),
         ),
@@ -174,7 +177,7 @@ class AppShadows {
 
   static List<BoxShadow> get subtle => [
         BoxShadow(
-          color: CupertinoColors.systemGrey.withOpacity(0.08),
+          color: AppColors.textPrimary.withOpacity(0.06),
           blurRadius: 6,
           offset: const Offset(0, 2),
         ),

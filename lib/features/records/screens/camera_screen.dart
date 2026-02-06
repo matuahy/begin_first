@@ -61,6 +61,15 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                     _error!,
                     style: AppTextStyles.body.copyWith(color: AppColors.error),
                   ),
+                  if (_error!.contains('相机权限')) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    AppButton(
+                      label: '去系统设置开启权限',
+                      leadingIcon: CupertinoIcons.settings,
+                      variant: AppButtonVariant.ghost,
+                      onPressed: () => ref.read(permissionServiceProvider).openAppSettings(),
+                    ),
+                  ],
                 ],
                 const SizedBox(height: AppSpacing.md),
                 AppButton(
@@ -89,11 +98,11 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
       _error = null;
     });
 
-    final permissionGranted = await ref.read(permissionServiceProvider).ensureCameraPermission();
+    final permissionGranted = await ref.read(permissionServiceProvider).hasCameraPermission();
     if (!permissionGranted) {
       setState(() {
         _isLoading = false;
-        _error = '相机权限被拒绝';
+        _error = '未获得相机权限，请在系统设置中开启后重试';
       });
       return;
     }

@@ -105,7 +105,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                           message: _query.isEmpty ? '先添加钥匙、门卡、耳机这些高频物品。' : '试试名称中的其他关键词。',
                           icon: _query.isEmpty ? CupertinoIcons.cube_box : CupertinoIcons.search,
                           actionLabel: _query.isEmpty ? '新建物品' : null,
-                          onAction: _query.isEmpty ? () => context.go('/items/new') : null,
+                          onAction: _query.isEmpty ? () => context.push('/items/new') : null,
                         );
                       }
 

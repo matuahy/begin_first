@@ -15,6 +15,25 @@ class SceneAdapter extends TypeAdapter<Scene> {
     final defaultItemIds = reader.readList().cast<String>();
     final isActive = reader.readBool();
     final sortOrder = reader.readInt();
+    var geofenceEnabled = false;
+    double? geofenceLatitude;
+    double? geofenceLongitude;
+    var geofenceRadiusMeters = 180;
+    try {
+      geofenceEnabled = reader.readBool();
+      geofenceLatitude = reader.readDouble();
+      geofenceLongitude = reader.readDouble();
+      geofenceRadiusMeters = reader.readInt();
+      if (!geofenceEnabled) {
+        geofenceLatitude = null;
+        geofenceLongitude = null;
+      }
+    } catch (_) {
+      geofenceEnabled = false;
+      geofenceLatitude = null;
+      geofenceLongitude = null;
+      geofenceRadiusMeters = 180;
+    }
     return Scene(
       id: id,
       name: name,
@@ -22,6 +41,10 @@ class SceneAdapter extends TypeAdapter<Scene> {
       iconName: iconName,
       defaultItemIds: defaultItemIds,
       isActive: isActive,
+      geofenceEnabled: geofenceEnabled,
+      geofenceLatitude: geofenceLatitude,
+      geofenceLongitude: geofenceLongitude,
+      geofenceRadiusMeters: geofenceRadiusMeters,
       sortOrder: sortOrder,
     );
   }
@@ -35,6 +58,10 @@ class SceneAdapter extends TypeAdapter<Scene> {
       ..writeString(obj.iconName)
       ..writeList(obj.defaultItemIds)
       ..writeBool(obj.isActive)
-      ..writeInt(obj.sortOrder);
+      ..writeInt(obj.sortOrder)
+      ..writeBool(obj.geofenceEnabled)
+      ..writeDouble(obj.geofenceLatitude ?? 0)
+      ..writeDouble(obj.geofenceLongitude ?? 0)
+      ..writeInt(obj.geofenceRadiusMeters);
   }
 }

@@ -11,23 +11,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class AppSettings {
   const AppSettings({
     required this.isFirstLaunch,
-    required this.notificationsEnabled,
-    required this.locationEnabled,
+    required this.initialPermissionsRequested,
+    required this.autoCheckoutEnabled,
   });
 
   final bool isFirstLaunch;
-  final bool notificationsEnabled;
-  final bool locationEnabled;
+  final bool initialPermissionsRequested;
+  final bool autoCheckoutEnabled;
 
   AppSettings copyWith({
     bool? isFirstLaunch,
-    bool? notificationsEnabled,
-    bool? locationEnabled,
+    bool? initialPermissionsRequested,
+    bool? autoCheckoutEnabled,
   }) {
     return AppSettings(
       isFirstLaunch: isFirstLaunch ?? this.isFirstLaunch,
-      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      locationEnabled: locationEnabled ?? this.locationEnabled,
+      initialPermissionsRequested: initialPermissionsRequested ?? this.initialPermissionsRequested,
+      autoCheckoutEnabled: autoCheckoutEnabled ?? this.autoCheckoutEnabled,
     );
   }
 }
@@ -41,15 +41,15 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
   final HiveBoxes _boxes;
   static const _firstLaunchKey = 'isFirstLaunch';
-  static const _notificationsKey = 'notificationsEnabled';
-  static const _locationKey = 'locationEnabled';
+  static const _initialPermissionsRequestedKey = 'initialPermissionsRequested';
+  static const _autoCheckoutEnabledKey = 'autoCheckoutEnabled';
 
   static AppSettings _load(HiveBoxes boxes) {
     final settings = boxes.settings;
     return AppSettings(
       isFirstLaunch: settings.get(_firstLaunchKey, defaultValue: true) as bool,
-      notificationsEnabled: settings.get(_notificationsKey, defaultValue: true) as bool,
-      locationEnabled: settings.get(_locationKey, defaultValue: true) as bool,
+      initialPermissionsRequested: settings.get(_initialPermissionsRequestedKey, defaultValue: false) as bool,
+      autoCheckoutEnabled: settings.get(_autoCheckoutEnabledKey, defaultValue: true) as bool,
     );
   }
 
@@ -58,14 +58,17 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
     state = state.copyWith(isFirstLaunch: false);
   }
 
-  Future<void> setNotificationsEnabled(bool enabled) async {
-    await _boxes.settings.put(_notificationsKey, enabled);
-    state = state.copyWith(notificationsEnabled: enabled);
+  Future<void> markInitialPermissionsRequested() async {
+    if (state.initialPermissionsRequested) {
+      return;
+    }
+    await _boxes.settings.put(_initialPermissionsRequestedKey, true);
+    state = state.copyWith(initialPermissionsRequested: true);
   }
 
-  Future<void> setLocationEnabled(bool enabled) async {
-    await _boxes.settings.put(_locationKey, enabled);
-    state = state.copyWith(locationEnabled: enabled);
+  Future<void> setAutoCheckoutEnabled(bool enabled) async {
+    await _boxes.settings.put(_autoCheckoutEnabledKey, enabled);
+    state = state.copyWith(autoCheckoutEnabled: enabled);
   }
 }
 

@@ -9,6 +9,7 @@ import 'package:begin_first/shared/widgets/app_card.dart';
 import 'package:begin_first/shared/widgets/empty_state.dart';
 import 'package:begin_first/services/notification_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -326,7 +327,7 @@ class _ScheduleRow extends ConsumerWidget {
       builder: (context) {
         return Container(
           height: 300,
-          color: CupertinoColors.systemBackground,
+          color: AppColors.secondaryBackground,
           child: Column(
             children: [
               Expanded(
@@ -373,22 +374,61 @@ class _ScheduleRow extends ConsumerWidget {
     if (!context.mounted) {
       return;
     }
-    await showCupertinoDialog<void>(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(success ? '已安排' : '需要权限'),
-        content: Text(
-          success ? '提醒已安排。' : '需要通知权限。',
-        ),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('确定'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
+    if (success) {
+      HapticFeedback.lightImpact();
+      _showTransientNudgeNotice(context, message: '提醒已安排。');
+    } else {
+      HapticFeedback.heavyImpact();
+      _showTransientNudgeNotice(
+        context,
+        message: '通知权限未开启，请到系统设置中开启后再试。',
+        warning: true,
+      );
+    }
   }
+}
+
+void _showTransientNudgeNotice(
+  BuildContext context, {
+  required String message,
+  bool warning = false,
+}) {
+  final overlay = Overlay.maybeOf(context);
+  if (overlay == null) {
+    return;
+  }
+
+  late OverlayEntry entry;
+  entry = OverlayEntry(
+    builder: (context) => Positioned(
+      top: MediaQuery.of(context).padding.top + AppSpacing.sm,
+      left: AppSpacing.md,
+      right: AppSpacing.md,
+      child: IgnorePointer(
+        child: AppCard(
+          color: warning ? const Color(0xFFFFF4E1) : AppColors.primarySoft,
+          child: Row(
+            children: [
+              Icon(
+                warning ? CupertinoIcons.exclamationmark_circle : CupertinoIcons.check_mark_circled,
+                size: 18,
+                color: warning ? AppColors.warning : AppColors.success,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: Text(message, style: AppTextStyles.bodyMuted)),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+
+  overlay.insert(entry);
+  Future<void>.delayed(const Duration(seconds: 2), () {
+    if (entry.mounted) {
+      entry.remove();
+    }
+  });
 }
 
 class _PendingNudgeTile extends ConsumerWidget {

@@ -1,3 +1,4 @@
+import 'package:begin_first/app/providers.dart';
 import 'package:begin_first/app/theme.dart';
 import 'package:begin_first/domain/models/enums/category.dart';
 import 'package:begin_first/domain/models/enums/importance.dart';
@@ -33,6 +34,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const totalPages = 4;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('欢迎'),
@@ -52,7 +54,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                       Container(color: AppColors.groupedBackground),
                       FractionallySizedBox(
                         alignment: Alignment.centerLeft,
-                        widthFactor: (_pageIndex + 1) / 3,
+                        widthFactor: (_pageIndex + 1) / totalPages,
                         child: const DecoratedBox(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(colors: [AppColors.primary, AppColors.primaryStrong]),
@@ -72,6 +74,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                   _buildWelcome(),
                   _buildSelectItems(),
                   _buildSelectScenes(),
+                  _buildPermissions(),
                 ],
               ),
             ),
@@ -81,9 +84,9 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                 children: [
                   Expanded(
                     child: AppButton(
-                      label: _pageIndex < 2 ? '下一步' : (_isSaving ? '保存中...' : '完成'),
-                      leadingIcon: _pageIndex < 2 ? CupertinoIcons.arrow_right : CupertinoIcons.checkmark,
-                      onPressed: _isSaving ? null : (_pageIndex < 2 ? _nextPage : _finish),
+                      label: _pageIndex < totalPages - 1 ? '下一步' : (_isSaving ? '保存中...' : '完成'),
+                      leadingIcon: _pageIndex < totalPages - 1 ? CupertinoIcons.arrow_right : CupertinoIcons.checkmark,
+                      onPressed: _isSaving ? null : (_pageIndex < totalPages - 1 ? _nextPage : _finish),
                     ),
                   ),
                 ],
@@ -144,8 +147,31 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
     );
   }
 
+  Widget _buildPermissions() {
+    return OnboardingPage(
+      title: '权限说明',
+      description: '首次完成引导时会申请通知、后台定位和相机权限，用于自动出门检查与快速记录。之后不再重复弹窗。',
+      child: const CupertinoFormSection.insetGrouped(
+        children: [
+          CupertinoFormRow(
+            prefix: Text('通知'),
+            child: Text('顺手提醒'),
+          ),
+          CupertinoFormRow(
+            prefix: Text('后台定位'),
+            child: Text('围栏自动触发'),
+          ),
+          CupertinoFormRow(
+            prefix: Text('相机'),
+            child: Text('拍照记录'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _nextPage() {
-    if (_pageIndex < 2) {
+    if (_pageIndex < 3) {
       _controller.nextPage(duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
     }
   }
@@ -201,10 +227,30 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
       }
     }
 
+    await _requestInitialPermissionsOnce();
+
     await ref.read(appSettingsProvider.notifier).completeOnboarding();
     if (mounted) {
       setState(() => _isSaving = false);
       context.go('/items');
+    }
+  }
+
+  Future<void> _requestInitialPermissionsOnce() async {
+    final settings = ref.read(appSettingsProvider);
+    if (settings.initialPermissionsRequested) {
+      return;
+    }
+
+    await ref.read(appSettingsProvider.notifier).markInitialPermissionsRequested();
+    final notificationService = ref.read(notificationServiceProvider);
+    final permissionService = ref.read(permissionServiceProvider);
+    try {
+      await notificationService.requestNotificationPermission();
+      await permissionService.ensureBackgroundLocationPermission();
+      await permissionService.ensureCameraPermission();
+    } catch (_) {
+      return;
     }
   }
 }
